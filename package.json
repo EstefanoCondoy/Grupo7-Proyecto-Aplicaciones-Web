@@ -1,0 +1,26 @@
+{
+  "name": "mortal-systems-epn",
+  "version": "1.0.0",
+  "description": "Mortal Systems: EPN Edition - Juego de pelea 2D con Phaser.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "phaser",
+    "game",
+    "fighting",
+    "2d"
+  ],
+  "author": "Estudiante EPN",
+  "license": "ISC",
+  "dependencies": {
+    "jimp": "^1.6.1",
+    "phaser": "^4.1.0"
+  },
+  "devDependencies": {
+    "vite": "^8.0.14"
+  }
+}

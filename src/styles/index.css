@@ -1,0 +1,68 @@
+/* ============================================
+   Mortal Systems: EPN Edition - Global Styles
+   ============================================ */
+
+/* Reset y base */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #0a0a1a;
+    font-family: 'Rajdhani', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevenir selección de texto en mobile */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    /* Prevenir scroll en mobile */
+    touch-action: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+/* Contenedor del juego centrado */
+#game-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(ellipse at center, #1a0a2e 0%, #0a0a1a 70%);
+}
+
+#game-container canvas {
+    display: block;
+    image-rendering: auto;
+}
+
+/* Desactivar comportamientos táctiles del navegador */
+canvas {
+    touch-action: none;
+    outline: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    body {
+        background-color: #000;
+    }
+    
+    #game-container {
+        background: #000;
+    }
+}
+
+@media (orientation: portrait) and (max-width: 768px) {
+    #game-container {
+        /* En modo retrato móvil sugerimos rotar */
+        background: #000;
+    }
+}
