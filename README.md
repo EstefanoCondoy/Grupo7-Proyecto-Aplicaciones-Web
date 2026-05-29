@@ -60,41 +60,47 @@ npm run preview
 ## 🏗️ Estructura del Proyecto
 
 ```
-src/
-├── main.js                     # Punto de entrada - Configuración de Phaser
-├── config/
-│   ├── gameConfig.js           # Constantes globales del juego
-│   └── characterData.js        # Datos de cada personaje
-├── scenes/
-│   ├── BootScene.js            # Carga de assets con barra de progreso
-│   ├── MenuScene.js            # Menú principal
-│   ├── CharacterSelectScene.js # Selección de personaje
-│   ├── FightScene.js           # Escena principal de combate
-│   ├── PauseScene.js           # Overlay de pausa
-│   ├── GameOverScene.js        # Pantalla de derrota
-│   └── VictoryScene.js         # Pantalla de victoria
-├── objects/
-│   ├── Fighter.js              # Clase base del luchador
-│   ├── PlayerFighter.js        # Luchador controlado por humano
-│   ├── AIFighter.js            # Luchador con IA (BONUS)
-│   └── Projectile.js           # Proyectiles de ataques especiales
-├── ui/
-│   ├── HealthBar.js            # Barra de vida dinámica
-│   ├── HUD.js                  # HUD completo del combate
-│   ├── TouchControls.js        # Controles táctiles para móvil
-│   └── Button.js               # Botón reutilizable para menús
-├── managers/
-│   ├── InputManager.js         # Gestión de controles teclado/touch
-│   ├── AudioManager.js         # Música, SFX y mute
-│   ├── StorageManager.js       # Persistencia con localStorage
-│   └── AnimationManager.js     # Animaciones de sprites con tweens
-├── physics/
-│   └── CollisionManager.js     # Colisiones, overlaps y efectos
-├── assets/
-│   ├── images/                 # Sprites y fondos
-│   └── audio/                  # (Audio generado programáticamente)
-└── styles/
-    └── index.css               # Estilos del contenedor HTML
+Proyecto/
+├── index.html                  # Plantilla HTML y configuración de viewport
+├── package.json                # Dependencias (Phaser 4, Vite, Jimp)
+├── vite.config.js              # Configuración del bundler Vite
+├── remove_bg.js                # Script Node.js para eliminar fondos (transparencia)
+├── process_sprites.js          # Script Node.js adicional para sprites
+├── src/
+│   ├── main.js                 # Punto de entrada - Configuración de Phaser
+│   ├── config/
+│   │   ├── gameConfig.js       # Constantes globales del juego
+│   │   └── characterData.js    # Datos de cada personaje
+│   ├── scenes/
+│   │   ├── BootScene.js        # Carga de assets (imágenes y spritesheets)
+│   │   ├── MenuScene.js        # Menú principal
+│   │   ├── CharacterSelectScene.js # Selección de personaje
+│   │   ├── FightScene.js       # Escena principal de combate
+│   │   ├── PauseScene.js       # Overlay de pausa
+│   │   ├── GameOverScene.js    # Pantalla de derrota
+│   │   └── VictoryScene.js     # Pantalla de victoria
+│   ├── objects/
+│   │   ├── Fighter.js          # Clase base del luchador
+│   │   ├── PlayerFighter.js    # Luchador controlado por humano
+│   │   ├── AIFighter.js        # Luchador con IA (BONUS)
+│   │   └── Projectile.js       # Proyectiles de ataques especiales
+│   ├── ui/
+│   │   ├── HealthBar.js        # Barra de vida dinámica
+│   │   ├── HUD.js              # HUD completo del combate
+│   │   ├── TouchControls.js    # Controles táctiles para móvil
+│   │   └── Button.js           # Botón reutilizable para menús
+│   ├── managers/
+│   │   ├── InputManager.js     # Gestión de controles teclado/touch
+│   │   ├── AudioManager.js     # Música y efectos vía Web Audio API
+│   │   ├── StorageManager.js   # Persistencia con localStorage
+│   │   └── AnimationManager.js # Animaciones reales con fotogramas (spritesheets)
+│   ├── physics/
+│   │   └── CollisionManager.js # Colisiones, overlaps y efectos
+│   ├── assets/
+│   │   ├── images/             # Spritesheets y fondos UI
+│   │   └── audio/              # (Audio generado programáticamente)
+│   └── styles/
+│       └── index.css           # Estilos base
 ```
 
 ## ⚙️ Tecnologías
