@@ -1,39 +1,44 @@
-# 🎮 Mortal Systems: EPN Edition
+# Mortal Systems: EPN Edition
+
 > Proyecto Final de Primer Bimestre - Aplicaciones Web
 > Desarrollo de Videojuegos con Phaser.js
 
-**Autores:** 
+**Autores:**
 - Estéfano Condoy
 - Eddy Sangucho
-- César Zapata  
+- César Zapata
+
 **Docente:** Ing. Jaime Sayago-Heredia  
 **Asignatura:** Aplicaciones Web  
 **Tecnología Central:** Phaser.js + JavaScript + Vite
 
 ---
 
-## 📖 1. Tema y Arquetipo del Proyecto
+## 1. Tema y Arquetipo del Proyecto
 
-**Mortal Systems: EPN Edition** es un videojuego original de pelea 2D, desarrollado íntegramente con tecnologías web modernas y el framework **Phaser.js**. 
+**Mortal Systems: EPN Edition** es un videojuego original de pelea 2D, desarrollado íntegramente con tecnologías web modernas y el framework **Phaser.js**.
+
 Inspirado en la vida universitaria y el desarrollo de software, el jugador selecciona un luchador representativo (Programador, Ingeniera) para enfrentarse a la máquina o a un temible jefe final.
 
 El proyecto cumple con creces el arquetipo de juego **Plataforma 2D / Arcade**, implementando físicas, saltos, colisiones precisas, barra de vida dinámica y sistema de rondas continuas.
 
-## 👥 2. Personajes
+## 2. Personajes
 
 | Personaje | Descripción | Movimiento Especial |
 |-----------|-------------|---------------------|
-| 🧑‍💻 **El Programador** | Estudiante ágil con hoodie y laptop. | *Stack Overflow* |
-| 🐛 **El Bug (BOSS)** | Criatura virus gigante (1.6x) y devastadora. | *Segfault Blast* |
-| 👩‍🔬 **La Ingeniera** | Full Stack Dev con bata de lab. Equilibrada. | *Compile Error* |
+| **El Programador** | Estudiante ágil con hoodie y laptop. | *Stack Overflow* |
+| **El Bug (BOSS)** | Criatura virus gigante (1.6x) y devastadora. | *Segfault Blast* |
+| **La Ingeniera** | Full Stack Dev con bata de laboratorio. Equilibrada. | *Compile Error* |
 
-## 🚀 3. Guía de Ejecución
+## 3. Guía de Ejecución
 
 ### Requisitos Previos
+
 - Node.js 18+ instalado
 - npm 9+
 
 ### Instalación y Desarrollo Local
+
 ```bash
 # Instalar dependencias
 npm install
@@ -41,21 +46,24 @@ npm install
 # Iniciar servidor de desarrollo con Vite
 npm run dev
 ```
+
 El juego estará disponible localmente en `http://localhost:3000`.
 
 ### Build de Producción
+
 ```bash
 npm run build
 npm run preview
 ```
 
-## 🎮 4. Controles (Responsive Design)
+## 4. Controles (Responsive Design)
 
 El juego detecta automáticamente el dispositivo y habilita controles táctiles si el jugador ingresa desde un teléfono o tablet.
 
 ### Desktop (Teclado)
+
 | Tecla | Acción |
-|-------|--------|
+|--------|--------|
 | `A` / `D` | Movimiento lateral |
 | `W` | Saltar |
 | `J` | Golpe rápido (Punch) |
@@ -64,76 +72,85 @@ El juego detecta automáticamente el dispositivo y habilita controles táctiles 
 | `ESC` | Pausar juego |
 
 ### Mobile (Touch Controls)
-- **D-pad virtual** integrado en la parte inferior izquierda para el movimiento.
-- **Botones de acción** en la parte inferior derecha para atacar y saltar.
+
+- D-pad virtual integrado en la parte inferior izquierda para el movimiento.
+- Botones de acción en la parte inferior derecha para atacar y saltar.
 - Pantallas totalmente adaptables (ScaleMode: FIT) para no deformar la imagen.
 
-## 🏗️ 5. Arquitectura y Estructura Profesional
+## 5. Arquitectura y Estructura Profesional
 
 El proyecto sigue una estructura modular orientada a objetos (POO), separando las responsabilidades para máxima escalabilidad y reutilización de código:
 
 ```text
 Proyecto/
-├── index.html                  # Plantilla HTML y configuración de viewport
-├── package.json                # Dependencias (Phaser, Vite, Jimp)
-├── vite.config.js              # Configuración del bundler Vite
-├── remove_bg.js                # Script Node.js para eliminar fondos (transparencia)
-├── process_sprites.js          # Script Node.js adicional para sprites
+├── index.html
+├── package.json
+├── vite.config.js
+├── remove_bg.js
+├── process_sprites.js
 ├── src/
-│   ├── main.js                 # Punto de entrada - Configuración de Phaser
+│   ├── main.js
 │   ├── config/
-│   │   ├── gameConfig.js       # Constantes globales del juego
-│   │   └── characterData.js    # Datos de cada personaje
+│   │   ├── gameConfig.js
+│   │   └── characterData.js
 │   ├── scenes/
-│   │   ├── BootScene.js        # Carga de assets (imágenes y spritesheets)
-│   │   ├── MenuScene.js        # Menú principal
-│   │   ├── CharacterSelectScene.js # Selección de personaje
-│   │   ├── FightScene.js       # Escena principal de combate
-│   │   ├── PauseScene.js       # Overlay de pausa
-│   │   ├── GameOverScene.js    # Pantalla de derrota
-│   │   └── VictoryScene.js     # Pantalla de victoria
+│   │   ├── BootScene.js
+│   │   ├── MenuScene.js
+│   │   ├── CharacterSelectScene.js
+│   │   ├── FightScene.js
+│   │   ├── PauseScene.js
+│   │   ├── GameOverScene.js
+│   │   └── VictoryScene.js
 │   ├── objects/
-│   │   ├── Fighter.js          # Clase base del luchador
-│   │   ├── PlayerFighter.js    # Luchador controlado por humano
-│   │   ├── AIFighter.js        # Luchador con IA (BONUS)
-│   │   └── Projectile.js       # Proyectiles de ataques especiales
+│   │   ├── Fighter.js
+│   │   ├── PlayerFighter.js
+│   │   ├── AIFighter.js
+│   │   └── Projectile.js
 │   ├── ui/
-│   │   ├── HealthBar.js        # Barra de vida dinámica
-│   │   ├── HUD.js              # HUD completo del combate
-│   │   ├── TouchControls.js    # Controles táctiles para móvil
-│   │   └── Button.js           # Botón reutilizable para menús
+│   │   ├── HealthBar.js
+│   │   ├── HUD.js
+│   │   ├── TouchControls.js
+│   │   └── Button.js
 │   ├── managers/
-│   │   ├── InputManager.js     # Gestión de controles teclado/touch
-│   │   ├── AudioManager.js     # Música y efectos vía Web Audio API
-│   │   ├── StorageManager.js   # Persistencia con localStorage
-│   │   └── AnimationManager.js # Animaciones reales con fotogramas
+│   │   ├── InputManager.js
+│   │   ├── AudioManager.js
+│   │   ├── StorageManager.js
+│   │   └── AnimationManager.js
 │   ├── physics/
-│   │   └── CollisionManager.js # Colisiones, overlaps y detección de impactos
+│   │   └── CollisionManager.js
 │   ├── assets/
-│   │   ├── images/             # Spritesheets y fondos UI
-│   │   └── audio/              # Audio generado
+│   │   ├── images/
+│   │   └── audio/
 │   └── styles/
-│       └── index.css           # Estilos base
+│       └── index.css
 ```
 
-## 🛠️ 6. Justificación de Requisitos Técnicos
+## 6. Justificación de Requisitos Técnicos
 
 El proyecto aprueba todos los criterios obligatorios detallados en la rúbrica:
 
-✅ **Arquitectura Phaser:** Uso extensivo de *Scene Manager* para el flujo de pantallas, loader de imágenes/audio y Game Loop.  
-✅ **Física y Colisiones:** Uso de `Arcade Physics` para gravedad, bloqueos con el suelo y un gestor matemático (`CollisionManager`) para detección precisa de impactos.  
-✅ **Audio:** Manejo mediante `AudioManager`. Incluye música de fondo y SFX de interfaz/combate.  
-✅ **Persistencia:** Uso de `localStorage` mediante la clase `StorageManager` para guardar High Scores, progreso y la configuración del audio (mute).  
-✅ **Mecánicas Obligatorias:** Movimiento fluido, sistema de rondas (Best of 3), HUD dinámico, condición de victoria/derrota.  
-✅ **Rendimiento:** Optimizado para +45 FPS estables, con carga eficiente a través de Spritesheets (en lugar de imágenes separadas).  
-✅ **Código Limpio:** Programación en ES6 Modules, comentarios explicativos y herencia de clases (`Fighter` -> `PlayerFighter` / `AIFighter`).  
+- **Arquitectura Phaser:** Uso extensivo de Scene Manager para el flujo de pantallas, loader de imágenes/audio y Game Loop.
+- **Física y Colisiones:** Uso de Arcade Physics para gravedad, bloqueos con el suelo y un gestor matemático (`CollisionManager`) para detección precisa de impactos.
+- **Audio:** Manejo mediante `AudioManager`. Incluye música de fondo y efectos de sonido de interfaz y combate.
+- **Persistencia:** Uso de `localStorage` mediante la clase `StorageManager` para guardar High Scores, progreso y configuración del audio.
+- **Mecánicas Obligatorias:** Movimiento fluido, sistema de rondas (Best of 3), HUD dinámico y condición de victoria o derrota.
+- **Rendimiento:** Optimizado para más de 45 FPS estables, con carga eficiente mediante spritesheets.
+- **Código Limpio:** Programación en ES6 Modules, comentarios explicativos y herencia de clases (`Fighter` → `PlayerFighter` / `AIFighter`).
 
-## 🏆 7. Bonus Implementados (+10%)
+## 7. Bonus Implementados (+10%)
 
-Se implementaron funcionalidades avanzadas que exceden los requisitos base y aplican para el puntaje Bonus:
+Se implementaron funcionalidades avanzadas que exceden los requisitos base:
 
-1. **Inteligencia Artificial (IA Avanzada):** Se desarrolló una máquina de estados para el enemigo (`AIFighter.js`) que calcula distancias, toma decisiones probabilísticas (atacar, acercarse, alejarse) y maneja tiempos de reacción lógicos.
-2. **Boss Final:** "El Bug" está programado como un jefe final con un modificador de escala masivo (`1.6x`), más puntos de vida, y un daño brutal, brindando un reto mayor en la batalla final.
+### Inteligencia Artificial (IA Avanzada)
 
-## 📄 Licencia
-Desarrollado para el Proyecto Final de Aplicaciones Web. Todos los derechos reservados - EPN 2026.
+Se desarrolló una máquina de estados para el enemigo (`AIFighter.js`) que calcula distancias, toma decisiones probabilísticas (atacar, acercarse o alejarse) y maneja tiempos de reacción lógicos.
+
+### Boss Final
+
+"El Bug" está programado como un jefe final con un modificador de escala masivo (`1.6x`), mayor cantidad de vida y daño incrementado, brindando un reto significativo en la batalla final.
+
+## Licencia
+
+Desarrollado para el Proyecto Final de Aplicaciones Web.
+
+Todos los derechos reservados - EPN 2026.
