@@ -2,7 +2,10 @@
 > Proyecto Final de Primer Bimestre - Aplicaciones Web
 > Desarrollo de Videojuegos con Phaser.js
 
-**Autor:** Estefano Condoy  
+**Autores:** 
+- Estéfano Condoy
+- Eddy Sangucho
+- César Zapata  
 **Docente:** Ing. Jaime Sayago-Heredia  
 **Asignatura:** Aplicaciones Web  
 **Tecnología Central:** Phaser.js + JavaScript + Vite
