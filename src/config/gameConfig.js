@@ -53,8 +53,8 @@ export const FIGHTER = {
     SPECIAL_DAMAGE: 30,      // Ataque especial
     
     // Rangos de ataque (distancia en px para considerar "en rango")
-    PUNCH_RANGE: 70,
-    KICK_RANGE: 90,
+    PUNCH_RANGE: 120,
+    KICK_RANGE: 140,
     SPECIAL_RANGE: 300,      // Proyectil / rango largo
     
     // Cooldowns (ms)

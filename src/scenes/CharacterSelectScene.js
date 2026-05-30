@@ -105,9 +105,14 @@ export default class CharacterSelectScene extends Phaser.Scene {
         // Almacenar referencia del fondo para el efecto de selección
         this.characterPreviews.push({ bg: cardBg, x, y, w, h, charData });
         
-        // Imagen del personaje (frame size 256x512)
-        const charImg = this.add.image(x, y - 60, charData.imageKey, 0);
-        charImg.setDisplaySize(90 * (charData.scaleMod || 1), 180 * (charData.scaleMod || 1));
+        // Fondo blanco sólido detrás de la imagen (como pidió el usuario)
+        const whiteBg = this.add.graphics();
+        whiteBg.fillStyle(0xffffff, 1);
+        whiteBg.fillRoundedRect(x - 70, y - 130, 140, 160, 8); // Coincide con el tamaño de 140x160 de la imagen
+        
+        // Imagen del personaje (retrato limpio de presentación)
+        const charImg = this.add.image(x, y - 50, charData.portraitKey || charData.imageKey);
+        charImg.setDisplaySize(140, 160);
         
         // Animación idle (respiración)
         this.tweens.add({
@@ -202,7 +207,7 @@ export default class CharacterSelectScene extends Phaser.Scene {
         
         // Actualizar bordes de todas las tarjetas
         this.characterPreviews.forEach((preview, i) => {
-            const { bg, x, y, w, h } = preview;
+            const { bg, x, y, w, h, glow } = preview;
             bg.clear();
             
             if (i === index) {

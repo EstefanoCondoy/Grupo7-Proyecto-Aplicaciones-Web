@@ -9,11 +9,13 @@ export default defineConfig({
         assetsDir: 'assets',
         // Optimización para el juego
         target: 'es2015',
-        minify: 'terser',
+        minify: 'esbuild',
         rollupOptions: {
             output: {
-                manualChunks: {
-                    phaser: ['phaser']
+                manualChunks(id) {
+                    if (id.includes('node_modules/phaser')) {
+                        return 'phaser';
+                    }
                 }
             }
         }

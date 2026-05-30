@@ -166,7 +166,7 @@ export default class MenuScene extends Phaser.Scene {
         this.cameras.main.fadeIn(500, 0, 0, 0);
         
         // Iniciar música
-        this.audioManager.playMusic();
+        this.audioManager.playMusic('music_menu');
     }
 
     /**

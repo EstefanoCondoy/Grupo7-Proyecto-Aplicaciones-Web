@@ -87,8 +87,8 @@ export default class VictoryScene extends Phaser.Scene {
         // ==========================================
         // PERSONAJE GANADOR
         // ==========================================
-        const charImg = this.add.image(GAME_WIDTH / 2, 210, charData.imageKey, 0);
-        charImg.setDisplaySize(110 * (charData.scaleMod || 1), 220 * (charData.scaleMod || 1));
+        const charImg = this.add.image(GAME_WIDTH / 2, 210, charData.portraitKey || charData.imageKey);
+        charImg.setDisplaySize(150, 170);
         
         // Animación de victoria (saltar)
         this.tweens.add({

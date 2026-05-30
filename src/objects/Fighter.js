@@ -39,10 +39,25 @@ export default class Fighter extends Phaser.Physics.Arcade.Sprite {
         this.jumpVelocity = Math.floor(FIGHTER.JUMP_VELOCITY * characterData.jumpMod);
         this.damageMod = characterData.damageMod;
         
-        // Ajustar escala en base al tamaño del frame (256x512) y el scaleMod del personaje
-        const baseW = 110 * (characterData.scaleMod || 1);
-        const baseH = 220 * (characterData.scaleMod || 1);
+        // Tamaño estándar universal, pero permitimos un multiplicador para los "jefes"
+        const scale = 1.4 * (characterData.scaleMod || 1);
+        const baseW = 110 * scale; 
+        const baseH = 220 * scale;
         this.setDisplaySize(baseW, baseH);
+        
+        // Aplicar un crop (recorte) al frame original para evitar que se vean
+        // píxeles "sangrados" de los frames adyacentes (ej: el pie del siguiente frame)
+        // El frame original es 256x512. Recortamos 16px de cada lado.
+        let cropY = 0;
+        let cropH = 512;
+        
+        // Si el personaje fue generado con un duplicado vertical en el mismo frame (ej: El Bug)
+        if (characterData.cropTopHalf) {
+            cropY = 256;  // Empezar desde la mitad (abajo)
+            cropH = 256;  // Mantener solo la mitad inferior
+        }
+        
+        this.setCrop(16, cropY, 224, cropH);
         
         // Guardar escala base para que AnimationManager la use si hace tweens
         this.baseScaleX = this.scaleX;

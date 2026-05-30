@@ -98,7 +98,7 @@ export default class FightScene extends Phaser.Scene {
         });
         
         // Iniciar música
-        this.audioManager.playMusic();
+        this.audioManager.playMusic('music_fight');
     }
 
     // ==========================================
@@ -177,16 +177,6 @@ export default class FightScene extends Phaser.Scene {
         
         // Colisión entre luchadores (no se atraviesan)
         this.physics.add.collider(this.player1, this.player2);
-        
-        // Overlap para detección de golpes (bidireccional)
-        this.collisionManager.setupFighterOverlap(
-            this.player1, this.player2,
-            (attacker, defender, damage) => this._onHit(attacker, defender, damage)
-        );
-        this.collisionManager.setupFighterOverlap(
-            this.player2, this.player1,
-            (attacker, defender, damage) => this._onHit(attacker, defender, damage)
-        );
     }
 
     // ==========================================
@@ -478,6 +468,9 @@ export default class FightScene extends Phaser.Scene {
         // Actualizar luchadores
         this.player1.update();
         this.player2.update();
+        
+        // Chequeo manual de golpes
+        this.collisionManager.update();
         
         // Actualizar HUD con los HP actuales
         this.hud.updateHealth(

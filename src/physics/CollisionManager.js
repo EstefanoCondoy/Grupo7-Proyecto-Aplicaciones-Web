@@ -49,26 +49,20 @@ export default class CollisionManager {
     }
 
     /**
-     * Configurar detección de golpes entre dos luchadores
-     * @param {Fighter} attacker - Luchador atacante
-     * @param {Fighter} defender - Luchador defensor
-     * @param {function} onHit - Callback cuando se conecta un golpe
+     * Update manual para chequear golpes sin usar overlap de físicas,
+     * ya que los colliders impiden que los cuerpos se intersecten.
      */
-    setupFighterOverlap(attacker, defender, onHit) {
-        this.scene.physics.add.overlap(
-            attacker, defender,
-            (attackerSprite, defenderSprite) => {
-                this._handleFighterOverlap(attackerSprite, defenderSprite, onHit);
-            },
-            null, this
-        );
+    update() {
+        if (!this.scene.player1 || !this.scene.player2) return;
+        
+        this._checkManualHit(this.scene.player1, this.scene.player2);
+        this._checkManualHit(this.scene.player2, this.scene.player1);
     }
 
     /**
-     * Manejar la superposición entre luchadores
-     * Verifica si hay un ataque activo y aplica daño
+     * Verificar si un ataque conecta basado en la distancia
      */
-    _handleFighterOverlap(attacker, defender, onHit) {
+    _checkManualHit(attacker, defender) {
         // Verificar que el atacante está atacando
         if (!attacker.isAttacking || !attacker.currentAttack) return;
         
@@ -79,30 +73,28 @@ export default class CollisionManager {
         const hitKey = `${attacker.fighterName}_${attacker.currentAttack}_${Date.now() >> 8}`;
         if (this.hitCooldowns.has(hitKey)) return;
         
-        // Verificar rango del ataque
-        const distance = Phaser.Math.Distance.Between(
-            attacker.x, attacker.y, 
-            defender.x, defender.y
-        );
-        
+        // Distancia real entre centros
+        const distance = Phaser.Math.Distance.Between(attacker.x, attacker.y, defender.x, defender.y);
         const range = attacker.getAttackRange();
-        if (distance > range * 1.2) return; // Margen de tolerancia
         
-        // ¡GOLPE CONECTADO!
-        const damage = attacker.getAttackDamage();
+        // Verificar que el atacante esté mirando hacia el defensor
+        const isFacingDefender = attacker.facingRight ? (defender.x > attacker.x) : (defender.x < attacker.x);
         
-        // Registrar cooldown
-        this.hitCooldowns.set(hitKey, true);
-        this.scene.time.delayedCall(500, () => {
-            this.hitCooldowns.delete(hitKey);
-        });
-        
-        // Crear efecto visual de impacto
-        this._createHitEffect(defender.x, defender.y - 20, attacker.currentAttack);
-        
-        // Callback
-        if (onHit) {
-            onHit(attacker, defender, damage);
+        if (distance <= range && isFacingDefender) {
+            // ¡GOLPE CONECTADO!
+            const damage = attacker.getAttackDamage();
+            
+            // Registrar cooldown
+            this.hitCooldowns.set(hitKey, true);
+            this.scene.time.delayedCall(500, () => {
+                this.hitCooldowns.delete(hitKey);
+            });
+            
+            // Crear efecto visual de impacto
+            this._createHitEffect(defender.x, defender.y - 20, attacker.currentAttack);
+            
+            // Aplicar daño a través del método de FightScene
+            this.scene._onHit(attacker, defender, damage);
         }
     }
 

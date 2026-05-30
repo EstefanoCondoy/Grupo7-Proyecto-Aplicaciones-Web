@@ -22,6 +22,11 @@ import gameOverImg from '../assets/images/game_over_screen.png';
 import victoryImg from '../assets/images/victory_screen.png';
 import effectsImg from '../assets/images/special_effects.png';
 
+// Retratos de personajes (imágenes estáticas de presentación)
+import fighter1Portrait from '../assets/images/fighter1_portrait.png';
+import fighter2Portrait from '../assets/images/fighter2_portrait.png';
+import fighter3Portrait from '../assets/images/fighter3_portrait.png';
+
 export default class BootScene extends Phaser.Scene {
     constructor() {
         super({ key: SCENES.BOOT });
@@ -56,6 +61,11 @@ export default class BootScene extends Phaser.Scene {
         
         // Efectos
         this.load.image('special_effects', effectsImg);
+        
+        // Retratos de personajes (para selección y victoria)
+        this.load.image('fighter1_portrait', fighter1Portrait);
+        this.load.image('fighter2_portrait', fighter2Portrait);
+        this.load.image('fighter3_portrait', fighter3Portrait);
     }
 
     /**

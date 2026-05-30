@@ -17,11 +17,12 @@ export const CHARACTERS = [
         subtitle: 'Backend Developer',
         description: 'Un estudiante con su hoodie y laptop. Rápido y ágil.',
         imageKey: 'fighter1_programmer',
-        
+        portraitKey: 'fighter1_portrait',
+
         // Color del personaje para efectos y UI
         tint: 0x6c5ce7,       // Púrpura
         glowColor: 0x6c5ce7,
-        
+
         // Stats (0-100 escala para display, modificadores reales abajo)
         statsDisplay: {
             speed: 80,
@@ -29,21 +30,21 @@ export const CHARACTERS = [
             defense: 50,
             special: 75,
         },
-        
+
         // Modificadores reales aplicados sobre las constantes base
         speedMod: 1.1,         // 10% más rápido
         damageMod: 0.9,        // 10% menos daño
         hpMod: 1.0,            // HP normal
         jumpMod: 1.05,         // Salto ligeramente mejor
         scaleMod: 1.5,         // Más grande porque el sprite está dibujado pequeño
-        
+
         // Nombres de ataques para UI
         attacks: {
             punch: 'Keyboard Smash',
             kick: 'Compiler Kick',
             special: 'Stack Overflow',
         },
-        
+
         // Color del proyectil especial
         specialColor: 0x6c5ce7,
     },
@@ -53,8 +54,9 @@ export const CHARACTERS = [
         subtitle: 'Runtime Error',
         description: 'Una criatura virus nacida de código corrupto. Poderoso pero lento.',
         imageKey: 'fighter2_bug',
+        portraitKey: 'fighter2_portrait',
         
-        tint: 0xff3838,        // Rojo
+        tint: 0xff3838,        // Rojo original del bug
         glowColor: 0xff3838,
         
         statsDisplay: {
@@ -68,7 +70,7 @@ export const CHARACTERS = [
         damageMod: 1.25,       // 25% más daño
         hpMod: 1.15,           // 15% más HP
         jumpMod: 0.9,          // Salto peor
-        scaleMod: 1.5,         // Escala ajustada
+        scaleMod: 1.6,         // Jefe gigante (nuevo tamaño aterrador)
         
         attacks: {
             punch: 'Null Pointer',
@@ -77,6 +79,7 @@ export const CHARACTERS = [
         },
         
         specialColor: 0xff3838,
+        cropTopHalf: true, // El sprite generado tiene dos personajes apilados verticalmente
     },
     {
         id: 'engineer',
@@ -84,29 +87,30 @@ export const CHARACTERS = [
         subtitle: 'Full Stack Dev',
         description: 'Estudiante con bata de laboratorio. Equilibrada y técnica.',
         imageKey: 'fighter3_student',
-        
+        portraitKey: 'fighter3_portrait',
+
         tint: 0x00cec9,        // Cyan/Teal
         glowColor: 0x00cec9,
-        
+
         statsDisplay: {
             speed: 70,
             power: 70,
             defense: 65,
             special: 80,
         },
-        
+
         speedMod: 1.0,         // Velocidad normal
         damageMod: 1.05,       // 5% más daño
         hpMod: 1.05,           // 5% más HP
         jumpMod: 1.0,          // Salto normal
         scaleMod: 1.2,         // Escala base (se ve bien, pero un poco más grande según petición)
-        
+
         attacks: {
             punch: 'Book Throw',
             kick: 'Debug Spin',
             special: 'Compile Error',
         },
-        
+
         specialColor: 0x00cec9,
     },
 ];
