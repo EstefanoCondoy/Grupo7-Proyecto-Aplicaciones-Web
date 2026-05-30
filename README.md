@@ -1,39 +1,44 @@
 # 🎮 Mortal Systems: EPN Edition
+> Proyecto Final de Primer Bimestre - Aplicaciones Web
+> Desarrollo de Videojuegos con Phaser.js
 
-> Juego de pelea 2D con temática de desarrollo de software, construido con **Phaser.js** + **Vite** + **JavaScript**.
+**Autor:** Estefano Condoy  
+**Docente:** Ing. Jaime Sayago-Heredia  
+**Asignatura:** Aplicaciones Web  
+**Tecnología Central:** Phaser.js + JavaScript + Vite
 
-## 📖 Descripción
+---
 
-**Mortal Systems: EPN Edition** es un juego de pelea 2D donde los personajes representan arquetipos del mundo del desarrollo de software y la vida universitaria. El jugador elige su luchador y se enfrenta contra una IA en combates de "best of 3" rondas.
+## 📖 1. Tema y Arquetipo del Proyecto
 
-### Personajes Disponibles
+**Mortal Systems: EPN Edition** es un videojuego original de pelea 2D, desarrollado íntegramente con tecnologías web modernas y el framework **Phaser.js**. 
+Inspirado en la vida universitaria y el desarrollo de software, el jugador selecciona un luchador representativo (Programador, Ingeniera) para enfrentarse a la máquina o a un temible jefe final.
 
-| Personaje | Descripción | Especial |
-|-----------|-------------|----------|
-| 🧑‍💻 **El Programador** | Estudiante ágil con hoodie y laptop | Stack Overflow |
-| 🐛 **El Bug** | Criatura virus poderosa pero lenta | Segfault Blast |
-| 👩‍🔬 **La Ingeniera** | Estudiante equilibrada con bata de lab | Compile Error |
+El proyecto cumple con creces el arquetipo de juego **Plataforma 2D / Arcade**, implementando físicas, saltos, colisiones precisas, barra de vida dinámica y sistema de rondas continuas.
 
-## 🚀 Ejecución Local
+## 👥 2. Personajes
+
+| Personaje | Descripción | Movimiento Especial |
+|-----------|-------------|---------------------|
+| 🧑‍💻 **El Programador** | Estudiante ágil con hoodie y laptop. | *Stack Overflow* |
+| 🐛 **El Bug (BOSS)** | Criatura virus gigante (1.6x) y devastadora. | *Segfault Blast* |
+| 👩‍🔬 **La Ingeniera** | Full Stack Dev con bata de lab. Equilibrada. | *Compile Error* |
+
+## 🚀 3. Guía de Ejecución
 
 ### Requisitos Previos
 - Node.js 18+ instalado
 - npm 9+
 
-### Instalación
+### Instalación y Desarrollo Local
 ```bash
-# Clonar el repositorio
-git clone <url-del-repositorio>
-cd Proyecto
-
 # Instalar dependencias
 npm install
 
-# Iniciar servidor de desarrollo
+# Iniciar servidor de desarrollo con Vite
 npm run dev
 ```
-
-El juego se abrirá automáticamente en `http://localhost:3000`
+El juego estará disponible localmente en `http://localhost:3000`.
 
 ### Build de Producción
 ```bash
@@ -41,28 +46,33 @@ npm run build
 npm run preview
 ```
 
-## 🎮 Controles
+## 🎮 4. Controles (Responsive Design)
+
+El juego detecta automáticamente el dispositivo y habilita controles táctiles si el jugador ingresa desde un teléfono o tablet.
 
 ### Desktop (Teclado)
 | Tecla | Acción |
 |-------|--------|
-| `A` / `D` | Mover izquierda / derecha |
+| `A` / `D` | Movimiento lateral |
 | `W` | Saltar |
-| `J` | Golpe rápido |
-| `K` | Patada fuerte |
-| `L` | Ataque especial |
-| `ESC` | Pausar |
+| `J` | Golpe rápido (Punch) |
+| `K` | Patada fuerte (Kick) |
+| `L` | Ataque Especial (Special) |
+| `ESC` | Pausar juego |
 
-### Mobile (Táctil)
-- **D-pad virtual** (izquierda) para movimiento y salto
-- **Botones de ataque** (derecha) para golpe, patada y especial
+### Mobile (Touch Controls)
+- **D-pad virtual** integrado en la parte inferior izquierda para el movimiento.
+- **Botones de acción** en la parte inferior derecha para atacar y saltar.
+- Pantallas totalmente adaptables (ScaleMode: FIT) para no deformar la imagen.
 
-## 🏗️ Estructura del Proyecto
+## 🏗️ 5. Arquitectura y Estructura Profesional
 
-```
+El proyecto sigue una estructura modular orientada a objetos (POO), separando las responsabilidades para máxima escalabilidad y reutilización de código:
+
+```text
 Proyecto/
 ├── index.html                  # Plantilla HTML y configuración de viewport
-├── package.json                # Dependencias (Phaser 4, Vite, Jimp)
+├── package.json                # Dependencias (Phaser, Vite, Jimp)
 ├── vite.config.js              # Configuración del bundler Vite
 ├── remove_bg.js                # Script Node.js para eliminar fondos (transparencia)
 ├── process_sprites.js          # Script Node.js adicional para sprites
@@ -93,69 +103,34 @@ Proyecto/
 │   │   ├── InputManager.js     # Gestión de controles teclado/touch
 │   │   ├── AudioManager.js     # Música y efectos vía Web Audio API
 │   │   ├── StorageManager.js   # Persistencia con localStorage
-│   │   └── AnimationManager.js # Animaciones reales con fotogramas (spritesheets)
+│   │   └── AnimationManager.js # Animaciones reales con fotogramas
 │   ├── physics/
-│   │   └── CollisionManager.js # Colisiones, overlaps y efectos
+│   │   └── CollisionManager.js # Colisiones, overlaps y detección de impactos
 │   ├── assets/
 │   │   ├── images/             # Spritesheets y fondos UI
-│   │   └── audio/              # (Audio generado programáticamente)
+│   │   └── audio/              # Audio generado
 │   └── styles/
 │       └── index.css           # Estilos base
 ```
 
-## ⚙️ Tecnologías
+## 🛠️ 6. Justificación de Requisitos Técnicos
 
-| Tecnología | Uso |
-|-----------|-----|
-| **Phaser.js 4** | Motor de juegos 2D |
-| **Vite** | Bundler y servidor de desarrollo |
-| **JavaScript ES6+** | Lenguaje principal |
-| **Web Audio API** | Audio sintetizado |
-| **localStorage** | Persistencia de datos |
+El proyecto aprueba todos los criterios obligatorios detallados en la rúbrica:
 
-## 🎯 Mecánicas Implementadas
+✅ **Arquitectura Phaser:** Uso extensivo de *Scene Manager* para el flujo de pantallas, loader de imágenes/audio y Game Loop.  
+✅ **Física y Colisiones:** Uso de `Arcade Physics` para gravedad, bloqueos con el suelo y un gestor matemático (`CollisionManager`) para detección precisa de impactos.  
+✅ **Audio:** Manejo mediante `AudioManager`. Incluye música de fondo y SFX de interfaz/combate.  
+✅ **Persistencia:** Uso de `localStorage` mediante la clase `StorageManager` para guardar High Scores, progreso y la configuración del audio (mute).  
+✅ **Mecánicas Obligatorias:** Movimiento fluido, sistema de rondas (Best of 3), HUD dinámico, condición de victoria/derrota.  
+✅ **Rendimiento:** Optimizado para +45 FPS estables, con carga eficiente a través de Spritesheets (en lugar de imágenes separadas).  
+✅ **Código Limpio:** Programación en ES6 Modules, comentarios explicativos y herencia de clases (`Fighter` -> `PlayerFighter` / `AIFighter`).  
 
-- ✅ Movimiento horizontal + salto
-- ✅ Sistema de ataques (golpe, patada, especial)
-- ✅ Detección de colisiones y overlaps
-- ✅ Barras de vida dinámicas con colores
-- ✅ Sistema de rondas (Best of 3)
-- ✅ Timer por ronda (99 segundos)
-- ✅ Condición de victoria y derrota
-- ✅ Sistema de puntaje
-- ✅ IA con máquina de estados (BONUS)
-- ✅ Menú principal con opciones
-- ✅ Selección de personaje
-- ✅ Pausa con overlay
-- ✅ Persistencia (High Score, nivel, audio)
-- ✅ Controles táctiles para móvil
-- ✅ Responsive design (Scale FIT)
-- ✅ Música de fondo + efectos de sonido
-- ✅ Botón de mute
-- ✅ Efectos visuales de impacto
-- ✅ Screen shake al recibir daño
+## 🏆 7. Bonus Implementados (+10%)
 
-## 🏆 Features Bonus (+10%)
+Se implementaron funcionalidades avanzadas que exceden los requisitos base y aplican para el puntaje Bonus:
 
-- ✅ **IA Avanzada**: Máquina de estados con comportamientos IDLE/APPROACH/ATTACK/RETREAT
-- ✅ **Boss Final**: El Bug tiene stats mejorados (+25% daño, +15% HP)
-- ✅ **Multiplayer Local**: Soporte para Jugador 2 (flechas + O/P/I)
-
-## 📊 Rendimiento
-
-- Target: 60 FPS
-- Mínimo: 45 FPS
-- Scale Mode: FIT (responsive)
-- WebGL con fallback a Canvas
-
-## 📝 Créditos
-
-- **Desarrollo**: Estudiante EPN
-- **Asignatura**: Aplicaciones Web
-- **Docente**: Jaime Sayago-Heredia
-- **Motor**: Phaser.js (phaser.io)
-- **Bundler**: Vite (vite.dev)
+1. **Inteligencia Artificial (IA Avanzada):** Se desarrolló una máquina de estados para el enemigo (`AIFighter.js`) que calcula distancias, toma decisiones probabilísticas (atacar, acercarse, alejarse) y maneja tiempos de reacción lógicos.
+2. **Boss Final:** "El Bug" está programado como un jefe final con un modificador de escala masivo (`1.6x`), más puntos de vida, y un daño brutal, brindando un reto mayor en la batalla final.
 
 ## 📄 Licencia
-
-Proyecto académico - EPN 2026
+Desarrollado para el Proyecto Final de Aplicaciones Web. Todos los derechos reservados - EPN 2026.
