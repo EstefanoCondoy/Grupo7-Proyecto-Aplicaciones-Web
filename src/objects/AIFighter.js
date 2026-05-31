@@ -162,6 +162,12 @@ export default class AIFighter extends Fighter {
         this.facingRight = this.target.x > this.x;
         this.setFlipX(!this.facingRight);
 
+        //para que el boss no dispare desde el otro lado del escenario
+        if (this.isBoss && dist <= FIGHTER_RANGES.SPECIAL && Math.random() < this.specialProb) {
+            this.special();
+            return;
+        }
+
         if (dist <= FIGHTER_RANGES.KICK && roll < 0.55) {
             this.kick();
         } else if (dist <= FIGHTER_RANGES.PUNCH && roll < 0.85) {

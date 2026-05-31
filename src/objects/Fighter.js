@@ -391,7 +391,7 @@ export default class Fighter extends Phaser.Physics.Arcade.Sprite {
             this.isInvincible = false;
             if (this.active && !this.isDead) {
                 this.clearTint();
-                this.setAlpha = 1;
+                this.alpha = 1;
             }
         });
 
