@@ -23,6 +23,8 @@ export default class GameOverScene extends Phaser.Scene {
         this.isNewHighScore = data.isNewHighScore || false;
         this.rounds = data.rounds || 0;
         this.characterId = data.character || 'programmer';
+        this.fightIndex = data.fightIndex || 1;
+        this.maxFights = data.maxFights || 3;
     }
 
     create() {
@@ -130,7 +132,11 @@ export default class GameOverScene extends Phaser.Scene {
         new Button(this, GAME_WIDTH / 2, 380, '🔄  REINTENTAR', () => {
             this.cameras.main.fadeOut(400, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', () => {
-                this.scene.start(SCENES.FIGHT, { playerCharacter: this.characterId });
+                this.scene.start(SCENES.FIGHT, {
+                    playerCharacter: this.characterId,
+                    fightIndex: this.fightIndex,
+                    maxFights: this.maxFights,
+                });
             });
         }, { width: 280, height: 50, fontSize: '20px', bgColor: 0xe17055 });
         

@@ -9,7 +9,7 @@
 
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS, SCENES } from '../config/gameConfig.js';
-import { CHARACTERS } from '../config/characterData.js';
+import { getSelectableCharacters } from '../config/characterData.js';
 import Button from '../ui/Button.js';
 import AudioManager from '../managers/AudioManager.js';
 
@@ -20,6 +20,7 @@ export default class CharacterSelectScene extends Phaser.Scene {
 
     create() {
         this.selectedIndex = 0;
+        this.characters = getSelectableCharacters();
         this.characterPreviews = [];
         this.statBars = [];
         
@@ -56,10 +57,10 @@ export default class CharacterSelectScene extends Phaser.Scene {
         const cardWidth = 220;
         const cardHeight = 340;
         const spacing = 40;
-        const totalWidth = CHARACTERS.length * cardWidth + (CHARACTERS.length - 1) * spacing;
+        const totalWidth = this.characters.length * cardWidth + (this.characters.length - 1) * spacing;
         const startX = (GAME_WIDTH - totalWidth) / 2 + cardWidth / 2;
         
-        CHARACTERS.forEach((charData, index) => {
+        this.characters.forEach((charData, index) => {
             const x = startX + index * (cardWidth + spacing);
             const y = GAME_HEIGHT / 2 + 20;
             
@@ -105,14 +106,16 @@ export default class CharacterSelectScene extends Phaser.Scene {
         // Almacenar referencia del fondo para el efecto de selección
         this.characterPreviews.push({ bg: cardBg, x, y, w, h, charData });
         
-        // Fondo blanco sólido detrás de la imagen (como pidió el usuario)
-        const whiteBg = this.add.graphics();
-        whiteBg.fillStyle(0xffffff, 1);
-        whiteBg.fillRoundedRect(x - 70, y - 130, 140, 160, 8); // Coincide con el tamaño de 140x160 de la imagen
-        
-        // Imagen del personaje (retrato limpio de presentación)
-        const charImg = this.add.image(x, y - 50, charData.portraitKey || charData.imageKey);
-        charImg.setDisplaySize(140, 160);
+        // Marco oscuro/transparente para respetar el PNG del retrato
+        const portraitFrame = this.add.graphics();
+        portraitFrame.fillStyle(0x050816, 0.55);
+        portraitFrame.fillRoundedRect(x - 82, y - 145, 164, 170, 12);
+        portraitFrame.lineStyle(1, charData.tint, 0.45);
+        portraitFrame.strokeRoundedRect(x - 82, y - 145, 164, 170, 12);
+
+        // Imagen del personaje sin fondo blanco
+        const charImg = this.add.image(x, y - 62, charData.portraitKey || charData.imageKey);
+        charImg.setDisplaySize(150, 150);
         
         // Animación idle (respiración)
         this.tweens.add({
@@ -124,23 +127,36 @@ export default class CharacterSelectScene extends Phaser.Scene {
             ease: 'Sine.easeInOut',
         });
         
+        // Placa para nombre y subtítulo
+        const namePlate = this.add.graphics();
+        namePlate.fillStyle(0x000000, 0.68);
+        namePlate.fillRoundedRect(x - 92, y + 10, 184, 48, 10);
+        namePlate.lineStyle(1, charData.tint, 0.55);
+        namePlate.strokeRoundedRect(x - 92, y + 10, 184, 48, 10);
+
         // Nombre
-        this.add.text(x, y + 15, charData.name, {
+        this.add.text(x, y + 25, charData.name, {
             fontFamily: 'Orbitron, monospace',
             fontSize: '14px',
             color: '#ffffff',
             fontStyle: 'bold',
+            stroke: '#000000',
+            strokeThickness: 3,
+            align: 'center',
+            wordWrap: { width: 170 },
         }).setOrigin(0.5);
-        
+
         // Subtítulo
-        this.add.text(x, y + 35, charData.subtitle, {
+        this.add.text(x, y + 45, charData.subtitle, {
             fontFamily: 'Rajdhani, sans-serif',
             fontSize: '12px',
             color: `#${charData.tint.toString(16).padStart(6, '0')}`,
+            stroke: '#000000',
+            strokeThickness: 2,
         }).setOrigin(0.5);
         
         // Stats bars
-        const statsStartY = y + 58;
+        const statsStartY = y + 70;
         const statNames = ['SPD', 'PWR', 'DEF', 'SPE'];
         const statKeys = ['speed', 'power', 'defense', 'special'];
         const statColors = [0x00e5ff, 0xff3366, 0x00ff88, 0xffd700];
@@ -200,7 +216,7 @@ export default class CharacterSelectScene extends Phaser.Scene {
      */
     _selectCharacter(index) {
         this.selectedIndex = index;
-        const charData = CHARACTERS[index];
+        const charData = this.characters[index];
         
         // Actualizar descripción
         this.descText.setText(charData.description);
@@ -236,7 +252,8 @@ export default class CharacterSelectScene extends Phaser.Scene {
             this.cameras.main.fadeOut(400, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', () => {
                 this.scene.start(SCENES.FIGHT, { 
-                    playerCharacter: charData.id 
+                    playerCharacter: charData.id,
+                    fightIndex: 1,
                 });
             });
         }, { 

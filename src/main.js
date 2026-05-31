@@ -14,7 +14,7 @@
  */
 
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, PHYSICS, COLORS } from './config/gameConfig.js';
+import { GAME_WIDTH, GAME_HEIGHT, PHYSICS, COLORS, DEBUG_HITBOXES } from './config/gameConfig.js';
 
 // Importar todas las escenas
 import BootScene from './scenes/BootScene.js';
@@ -54,7 +54,7 @@ const config = {
         default: 'arcade',
         arcade: {
             gravity: { y: PHYSICS.GRAVITY },
-            debug: false, // Cambiar a true para ver hitboxes
+            debug: DEBUG_HITBOXES,
         },
     },
     

@@ -2,17 +2,14 @@
  * ============================================
  * AIFighter.js - Luchador controlado por IA
  * ============================================
- * BONUS: IA Avanzada (+10%)
- * Implementa una máquina de estados simple para controlar
- * al oponente: IDLE, APPROACH, ATTACK, RETREAT.
- * Usa distancia al jugador y HP propio para tomar decisiones.
+ * Maquina de estados simple para controlar al oponente:
+ * IDLE, APPROACH, ATTACK, RETREAT.
  */
 
 import Phaser from 'phaser';
 import Fighter from './Fighter.js';
-import { AI, FIGHTER } from '../config/gameConfig.js';
+import { AI, FIGHTER, GAME_WIDTH } from '../config/gameConfig.js';
 
-// Estados de la IA
 const AI_STATE = {
     IDLE: 'IDLE',
     APPROACH: 'APPROACH',
@@ -20,12 +17,13 @@ const AI_STATE = {
     RETREAT: 'RETREAT',
 };
 
-// Rangos de referencia para la IA
 const FIGHTER_RANGES = {
-    PUNCH: FIGHTER.PUNCH_RANGE + 20,
-    KICK: FIGHTER.KICK_RANGE + 30,
+    PUNCH: FIGHTER.PUNCH_RANGE + 45,
+    KICK: FIGHTER.KICK_RANGE + 55,
     SPECIAL: FIGHTER.SPECIAL_RANGE,
 };
+
+const ARENA_EDGE_PADDING = 120;
 
 export default class AIFighter extends Fighter {
     /**
@@ -35,25 +33,30 @@ export default class AIFighter extends Fighter {
      * @param {string} texture
      * @param {object} characterData
      * @param {boolean} facingRight
-     * @param {number} difficulty - 1 (fácil) a 3 (difícil)
+     * @param {number} difficulty - 1 facil a 3 dificil
      */
     constructor(scene, x, y, texture, characterData, facingRight = false, difficulty = 2) {
         super(scene, x, y, texture, characterData, facingRight);
-        
-        this.target = null;       // Referencia al jugador
+
+        this.target = null;
         this.state = AI_STATE.IDLE;
         this.difficulty = difficulty;
         this.lastThinkTime = 0;
-        this.thinkInterval = AI.THINK_INTERVAL / difficulty; // Más difícil = piensa más rápido
-        
-        // Modificadores de dificultad
-        this.attackProb = AI.ATTACK_PROBABILITY * (0.5 + difficulty * 0.25);
-        this.specialProb = AI.SPECIAL_PROBABILITY * difficulty;
-        this.reactionTime = 400 / difficulty; // ms para reaccionar
+        this.thinkInterval = AI.THINK_INTERVAL / difficulty;
+
+        this.attackProb = Math.min(0.9, AI.ATTACK_PROBABILITY * (0.75 + difficulty * 0.25));
+        this.specialProb = Math.min(0.45, AI.SPECIAL_PROBABILITY * (difficulty + 0.5));
+
+        this.isBoss = characterData.id === 'boss';
+        if (this.isBoss) {
+            this.thinkInterval *= 0.55; // Boss piensa más rápido
+            this.attackProb = 0.95;
+            this.specialProb = 0.5;
+        }
     }
 
     /**
-     * Establecer el objetivo (jugador)
+     * Establecer objetivo.
      * @param {Fighter} target
      */
     setTarget(target) {
@@ -61,87 +64,72 @@ export default class AIFighter extends Fighter {
     }
 
     /**
-     * Update de la IA - ejecuta la máquina de estados
+     * Update de la IA.
      */
     update() {
         if (this.isDead || !this.target || this.target.isDead) {
             this.setVelocityX(0);
             return;
         }
-        
+
         const now = Date.now();
-        
-        // Solo "pensar" cada X milisegundos
+
         if (now - this.lastThinkTime < this.thinkInterval) {
-            // Continuar la acción actual
             this._executeState();
             return;
         }
-        
+
         this.lastThinkTime = now;
-        
-        // Calcular distancia al jugador
+
         const dist = this.distanceTo(this.target);
         const hpPercent = this.getHpPercent();
-        
-        // Actualizar dirección (siempre mirar al jugador)
-        this.facingRight = this.target.x > this.x;
-        this.setFlipX(!this.facingRight);
-        
-        // ==========================================
-        // MÁQUINA DE ESTADOS DE LA IA
-        // ==========================================
-        
-        // Si tiene poca vida, retirarse más frecuentemente
-        if (hpPercent < AI.RETREAT_HP_THRESHOLD && Math.random() < 0.6) {
+        const isCornered = this._isCornered();
+
+        // this.facingRight = this.target.x > this.x;
+        // this.setFlipX(!this.facingRight);
+        // el boss siempre mira al jugador, incluso si está retrocediendo
+        if (this.isBoss && dist <= FIGHTER_RANGES.SPECIAL && Math.random() < this.specialProb) {
+            this.special();
+            return;
+        }
+
+        if (!this.isBoss && !isCornered && hpPercent < AI.RETREAT_HP_THRESHOLD && Math.random() < 0.18) {
             this.state = AI_STATE.RETREAT;
-        }
-        // Si está lejos, acercarse
-        else if (dist > AI.APPROACH_DISTANCE) {
+        } else if (dist > AI.APPROACH_DISTANCE) {
             this.state = AI_STATE.APPROACH;
-        }
-        // Si está en rango medio, decidir entre acercarse o atacar
-        else if (dist > AI.ATTACK_DISTANCE) {
-            if (Math.random() < this.attackProb * 0.5) {
-                this.state = AI_STATE.APPROACH;
-            } else if (Math.random() < this.specialProb) {
+        } else if (dist > AI.ATTACK_DISTANCE) {
+            if (Math.random() < this.attackProb || isCornered) {
                 this.state = AI_STATE.ATTACK;
-            } else {
+            } else if (Math.random() < 0.2) {
                 this.state = AI_STATE.IDLE;
-            }
-        }
-        // Si está en rango de ataque
-        else {
-            if (Math.random() < this.attackProb) {
-                this.state = AI_STATE.ATTACK;
             } else {
-                this.state = Math.random() < 0.5 ? AI_STATE.IDLE : AI_STATE.RETREAT;
+                this.state = AI_STATE.APPROACH;
             }
+        } else if (Math.random() < this.attackProb || isCornered) {
+            this.state = AI_STATE.ATTACK;
+        } else {
+            this.state = AI_STATE.IDLE;
         }
-        
-        // Ejecutar la acción del estado
+
         this._executeState();
     }
 
     /**
-     * Ejecutar la acción del estado actual
+     * Ejecutar estado actual.
      */
     _executeState() {
         if (this.isHurt || this.isAttacking) return;
-        
+
         switch (this.state) {
             case AI_STATE.IDLE:
                 this.move(0);
                 break;
-                
             case AI_STATE.APPROACH:
                 this._approach();
                 break;
-                
             case AI_STATE.ATTACK:
                 this._attack();
                 break;
-                
             case AI_STATE.RETREAT:
                 this._retreat();
                 break;
@@ -149,56 +137,70 @@ export default class AIFighter extends Fighter {
     }
 
     /**
-     * Acercarse al jugador
+     * Acercarse al jugador.
      */
     _approach() {
         if (!this.target) return;
-        
+
         const dir = this.target.x > this.x ? 1 : -1;
         this.move(dir);
-        
-        // Saltar aleatoriamente para parecer más dinámico
-        if (Math.random() < 0.02 * this.difficulty) {
+
+        if (Math.random() < 0.01 * this.difficulty && this.distanceTo(this.target) > 160) {
             this.jump();
         }
     }
 
     /**
-     * Ejecutar un ataque
+     * Atacar segun distancia.
      */
     _attack() {
         if (!this.target || this.isAttacking) return;
-        
+
         const dist = this.distanceTo(this.target);
-        
-        // Elegir ataque según distancia y probabilidad
         const roll = Math.random();
-        
-        if (dist <= FIGHTER_RANGES.PUNCH && roll < 0.5) {
-            this.punch();
-        } else if (dist <= FIGHTER_RANGES.KICK && roll < 0.8) {
+
+        this.facingRight = this.target.x > this.x;
+        this.setFlipX(!this.facingRight);
+
+        if (dist <= FIGHTER_RANGES.KICK && roll < 0.55) {
             this.kick();
-        } else if (roll < this.specialProb) {
+        } else if (dist <= FIGHTER_RANGES.PUNCH && roll < 0.85) {
+            this.punch();
+        } else if (dist <= FIGHTER_RANGES.SPECIAL && roll < this.specialProb) {
             this.special();
         } else {
-            // Si no atacó, acercarse
             this._approach();
         }
     }
 
     /**
-     * Retirarse del jugador
+     * Retirada corta. Si esta arrinconado, contraataca.
      */
     _retreat() {
         if (!this.target) return;
-        
-        // Moverse en dirección opuesta al jugador
+
+        if (this._isCornered()) {
+            this.state = AI_STATE.ATTACK;
+            this._attack();
+            return;
+        }
+
         const dir = this.target.x > this.x ? -1 : 1;
         this.move(dir);
-        
-        // Contraatacar mientras retrocede
-        if (Math.random() < 0.1 * this.difficulty) {
-            this.punch();
+
+        if (Math.random() < 0.25 * this.difficulty) {
+            this.special();
         }
+    }
+
+    /**
+     * Detecta esquinas para evitar IA excesivamente evasiva.
+     */
+    _isCornered() {
+        if (!this.target) return false;
+
+        const nearLeft = this.x < ARENA_EDGE_PADDING && this.target.x > this.x;
+        const nearRight = this.x > GAME_WIDTH - ARENA_EDGE_PADDING && this.target.x < this.x;
+        return nearLeft || nearRight;
     }
 }

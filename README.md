@@ -1,156 +1,119 @@
 # Mortal Systems: EPN Edition
 
-> Proyecto Final de Primer Bimestre - Aplicaciones Web
-> Desarrollo de Videojuegos con Phaser.js
+Proyecto final de Aplicaciones Web: videojuego 2D de pelea hecho con Phaser.js, JavaScript y Vite.
 
-**Autores:**
-- Estéfano Condoy
-- Eddy Sangucho
-- César Zapata
+## Resumen
 
-**Docente:** Ing. Jaime Sayago-Heredia  
-**Asignatura:** Aplicaciones Web  
-**Tecnología Central:** Phaser.js + JavaScript + Vite
+**Mortal Systems: EPN Edition** mantiene una estetica cyberpunk/universitaria y enfrenta a estudiantes de software contra amenazas nacidas del codigo corrupto. El juego incluye seleccion de personaje, combate 1 vs IA, HUD, audio, pausa, controles tactiles, persistencia en `localStorage` y sistema de rondas al mejor de 3.
 
----
+## Personajes
 
-## 1. Tema y Arquetipo del Proyecto
+| Personaje | Descripcion | Ataques |
+| --- | --- | --- |
+| El Programador | Estudiante con hoodie/laptop. Rapido y agil. | Keyboard Smash, Compiler Kick, Stack Overflow |
+| El Bug | Criatura virus / boss. Poderoso pero lento. | Null Pointer, Memory Leak, Segfault Blast |
+| La Ingeniera | Estudiante full stack con bata. Equilibrada. | Book Throw, Debug Spin, Compile Error |
 
-**Mortal Systems: EPN Edition** es un videojuego original de pelea 2D, desarrollado íntegramente con tecnologías web modernas y el framework **Phaser.js**.
+## Ejecucion
 
-Inspirado en la vida universitaria y el desarrollo de software, el jugador selecciona un luchador representativo (Programador, Ingeniera) para enfrentarse a la máquina o a un temible jefe final.
+Requisitos:
 
-El proyecto cumple con creces el arquetipo de juego **Plataforma 2D / Arcade**, implementando físicas, saltos, colisiones precisas, barra de vida dinámica y sistema de rondas continuas.
-
-## 2. Personajes
-
-| Personaje | Descripción | Movimiento Especial |
-|-----------|-------------|---------------------|
-| **El Programador** | Estudiante ágil con hoodie y laptop. | *Stack Overflow* |
-| **El Bug (BOSS)** | Criatura virus gigante (1.6x) y devastadora. | *Segfault Blast* |
-| **La Ingeniera** | Full Stack Dev con bata de laboratorio. Equilibrada. | *Compile Error* |
-
-## 3. Guía de Ejecución
-
-### Requisitos Previos
-
-- Node.js 18+ instalado
+- Node.js 18+
 - npm 9+
 
-### Instalación y Desarrollo Local
+Instalacion y desarrollo:
 
 ```bash
-# Instalar dependencias
 npm install
-
-# Iniciar servidor de desarrollo con Vite
 npm run dev
 ```
 
-El juego estará disponible localmente en `http://localhost:3000`.
-
-### Build de Producción
+Build de produccion:
 
 ```bash
 npm run build
 npm run preview
 ```
 
-## 4. Controles (Responsive Design)
+Por defecto Vite sirve el juego en `http://localhost:3000`.
 
-El juego detecta automáticamente el dispositivo y habilita controles táctiles si el jugador ingresa desde un teléfono o tablet.
+## Controles
 
-### Desktop (Teclado)
-
-| Tecla | Acción |
-|--------|--------|
+| Tecla | Accion |
+| --- | --- |
 | `A` / `D` | Movimiento lateral |
 | `W` | Saltar |
-| `J` | Golpe rápido (Punch) |
-| `K` | Patada fuerte (Kick) |
-| `L` | Ataque Especial (Special) |
-| `ESC` | Pausar juego |
+| `J` | Golpe rapido |
+| `K` | Patada fuerte |
+| `L` | Ataque especial |
+| `ESC` | Pausar |
 
-### Mobile (Touch Controls)
+En moviles o tablets se mantienen controles tactiles con D-pad virtual y botones de accion.
 
-- D-pad virtual integrado en la parte inferior izquierda para el movimiento.
-- Botones de acción en la parte inferior derecha para atacar y saltar.
-- Pantallas totalmente adaptables (ScaleMode: FIT) para no deformar la imagen.
+## Mejoras Implementadas
 
-## 5. Arquitectura y Estructura Profesional
+- Spritesheets configurados por personaje desde `characterData.js`.
+- El Bug usa su spritesheet real `4x4` con frames `256x256`.
+- Programador e Ingeniera usan spritesheets `4x2` con frames `256x512`.
+- Los luchadores usan origen inferior (`0.5, 1`) y se crean/resetan sobre `PHYSICS.GROUND_Y`.
+- Se elimino el crop global que podia cortar patadas, brazos o efectos.
+- El tamano visual y cuerpo fisico se configuran por personaje.
+- Punch y kick usan hitboxes temporales con Arcade Physics `overlap`.
+- Las hitboxes respetan la direccion del luchador y tienen cooldown para evitar dano repetido.
+- `DEBUG_HITBOXES` permite mostrar hitboxes durante desarrollo.
+- Los ataques especiales generan proyectiles fisicos desde `Projectile.js`.
+- Los proyectiles viajan horizontalmente, ignoran gravedad, usan el color del personaje, danan solo al enemigo y se destruyen al impactar o salir de pantalla.
+- Se agrego `.gitignore` y `node_modules` se saco del tracking de Git.
+- Se agrego `esbuild` como dependencia de desarrollo requerida por la version actual de Vite.
 
-El proyecto sigue una estructura modular orientada a objetos (POO), separando las responsabilidades para máxima escalabilidad y reutilización de código:
+## Estructura
 
 ```text
-Proyecto/
-├── index.html
-├── package.json
-├── vite.config.js
-├── remove_bg.js
-├── process_sprites.js
-├── src/
-│   ├── main.js
-│   ├── config/
-│   │   ├── gameConfig.js
-│   │   └── characterData.js
-│   ├── scenes/
-│   │   ├── BootScene.js
-│   │   ├── MenuScene.js
-│   │   ├── CharacterSelectScene.js
-│   │   ├── FightScene.js
-│   │   ├── PauseScene.js
-│   │   ├── GameOverScene.js
-│   │   └── VictoryScene.js
-│   ├── objects/
-│   │   ├── Fighter.js
-│   │   ├── PlayerFighter.js
-│   │   ├── AIFighter.js
-│   │   └── Projectile.js
-│   ├── ui/
-│   │   ├── HealthBar.js
-│   │   ├── HUD.js
-│   │   ├── TouchControls.js
-│   │   └── Button.js
-│   ├── managers/
-│   │   ├── InputManager.js
-│   │   ├── AudioManager.js
-│   │   ├── StorageManager.js
-│   │   └── AnimationManager.js
-│   ├── physics/
-│   │   └── CollisionManager.js
-│   ├── assets/
-│   │   ├── images/
-│   │   └── audio/
-│   └── styles/
-│       └── index.css
+src/
+|-- config/
+|-- scenes/
+|-- objects/
+|-- ui/
+|-- managers/
+|-- physics/
+|-- assets/
+`-- styles/
 ```
 
-## 6. Justificación de Requisitos Técnicos
+Archivos principales:
 
-El proyecto aprueba todos los criterios obligatorios detallados en la rúbrica:
+- `src/config/characterData.js`: stats, frames, visuales, animaciones e hitboxes por personaje.
+- `src/config/gameConfig.js`: constantes globales, suelo, fisica, controles y `DEBUG_HITBOXES`.
+- `src/scenes/BootScene.js`: carga de assets y spritesheets por personaje.
+- `src/objects/Fighter.js`: movimiento, ataques y creacion de proyectiles.
+- `src/physics/CollisionManager.js`: suelo, hitboxes, proyectiles e impactos.
+- `src/objects/Projectile.js`: proyectil fisico para especiales.
 
-- **Arquitectura Phaser:** Uso extensivo de Scene Manager para el flujo de pantallas, loader de imágenes/audio y Game Loop.
-- **Física y Colisiones:** Uso de Arcade Physics para gravedad, bloqueos con el suelo y un gestor matemático (`CollisionManager`) para detección precisa de impactos.
-- **Audio:** Manejo mediante `AudioManager`. Incluye música de fondo y efectos de sonido de interfaz y combate.
-- **Persistencia:** Uso de `localStorage` mediante la clase `StorageManager` para guardar High Scores, progreso y configuración del audio.
-- **Mecánicas Obligatorias:** Movimiento fluido, sistema de rondas (Best of 3), HUD dinámico y condición de victoria o derrota.
-- **Rendimiento:** Optimizado para más de 45 FPS estables, con carga eficiente mediante spritesheets.
-- **Código Limpio:** Programación en ES6 Modules, comentarios explicativos y herencia de clases (`Fighter` → `PlayerFighter` / `AIFighter`).
+## Requisitos De Rubrica Cubiertos
 
-## 7. Bonus Implementados (+10%)
+- Phaser Scene Manager para flujo completo: menu, seleccion, combate, pausa, game over y victoria.
+- Arcade Physics para gravedad, suelo, cuerpos, hitboxes y proyectiles.
+- Game Loop con actualizacion de luchadores, IA, HUD y colisiones.
+- Sistema de rondas best of 3.
+- IA con estados de aproximacion, ataque, retirada e idle.
+- HUD con vida, ronda, tiempo, score y victorias por ronda.
+- Audio, mute y configuracion persistida.
+- Persistencia con `localStorage`.
+- Controles de teclado y tactiles.
+- Estructura modular con ES Modules y clases reutilizables.
+- Limpieza del repositorio con `.gitignore` y dependencias fuera del tracking.
 
-Se implementaron funcionalidades avanzadas que exceden los requisitos base:
+## Limitaciones Y Mejoras Futuras
 
-### Inteligencia Artificial (IA Avanzada)
+- Los spritesheets actuales se conservan sin regenerar arte; si algun frame original ya trae contenido pegado al borde, se puede crear una version normalizada con margen transparente por frame.
+- Las hitboxes son rectangulares para mantener compatibilidad simple con Arcade Physics.
+- El juego mantiene IA local; no incluye multijugador en red.
+- Futuras mejoras posibles: selector de dificultad, balance fino por personaje, mas feedback visual por proyectil y pruebas automatizadas de escenas.
 
-Se desarrolló una máquina de estados para el enemigo (`AIFighter.js`) que calcula distancias, toma decisiones probabilísticas (atacar, acercarse o alejarse) y maneja tiempos de reacción lógicos.
+## Autores
 
-### Boss Final
+- Estefano Condoy
+- Eddy Sangucho
+- Cesar Zapata
 
-"El Bug" está programado como un jefe final con un modificador de escala masivo (`1.6x`), mayor cantidad de vida y daño incrementado, brindando un reto significativo en la batalla final.
-
-## Licencia
-
-Desarrollado para el Proyecto Final de Aplicaciones Web.
-
-Todos los derechos reservados - EPN 2026.
+Desarrollado para la asignatura Aplicaciones Web, EPN 2026.

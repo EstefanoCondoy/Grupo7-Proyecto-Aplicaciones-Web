@@ -9,8 +9,8 @@
  */
 
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, COLORS, SCENES, COMBAT, PHYSICS, FIGHTER } from '../config/gameConfig.js';
-import { getCharacterById, CHARACTERS } from '../config/characterData.js';
+import { GAME_WIDTH, GAME_HEIGHT, COLORS, SCENES, COMBAT, PHYSICS, CAMPAIGN } from '../config/gameConfig.js';
+import { getCharacterById, getSelectableCharacters } from '../config/characterData.js';
 import PlayerFighter from '../objects/PlayerFighter.js';
 import AIFighter from '../objects/AIFighter.js';
 import InputManager from '../managers/InputManager.js';
@@ -30,10 +30,12 @@ export default class FightScene extends Phaser.Scene {
      */
     init(data) {
         this.playerCharacterId = data.playerCharacter || 'programmer';
+        this.fightIndex = data.fightIndex || 1;
+        this.maxFights = data.maxFights || CAMPAIGN.MAX_FIGHTS;
         this.currentRound = 1;
         this.p1Wins = 0;
         this.p2Wins = 0;
-        this.score = 0;
+        this.score = data.campaignScore || 0;
         this.roundActive = false;
         this.matchOver = false;
     }
@@ -114,11 +116,11 @@ export default class FightScene extends Phaser.Scene {
         // Suelo visible (decorativo)
         const groundGfx = this.add.graphics();
         groundGfx.fillStyle(0x1a1a2e, 0.9);
-        groundGfx.fillRect(0, PHYSICS.GROUND_Y - 5, GAME_WIDTH, GAME_HEIGHT - PHYSICS.GROUND_Y + 5);
+        groundGfx.fillRect(0, PHYSICS.GROUND_Y, GAME_WIDTH, GAME_HEIGHT - PHYSICS.GROUND_Y);
         
         // Línea del suelo
         groundGfx.lineStyle(2, COLORS.SECONDARY, 0.4);
-        groundGfx.lineBetween(0, PHYSICS.GROUND_Y - 5, GAME_WIDTH, PHYSICS.GROUND_Y - 5);
+        groundGfx.lineBetween(0, PHYSICS.GROUND_Y, GAME_WIDTH, PHYSICS.GROUND_Y);
         
         // Reflejo sutil
         groundGfx.fillStyle(COLORS.SECONDARY, 0.05);
@@ -134,9 +136,7 @@ export default class FightScene extends Phaser.Scene {
         // Datos de los personajes
         const p1Data = getCharacterById(this.playerCharacterId);
         
-        // Elegir enemigo aleatorio (diferente al jugador)
-        const enemyOptions = CHARACTERS.filter(c => c.id !== this.playerCharacterId);
-        const p2Data = enemyOptions[Math.floor(Math.random() * enemyOptions.length)];
+        const p2Data = this._selectOpponent(p1Data);
         
         this.p1Data = p1Data;
         this.p2Data = p2Data;
@@ -154,16 +154,38 @@ export default class FightScene extends Phaser.Scene {
         );
         
         // Crear Jugador 2 (IA)
+        const aiDifficulty = p2Data.id === CAMPAIGN.BOSS_ID ? 3.3 : 2;
+
         this.player2 = new AIFighter(
             this,
             COMBAT.P2_START_X, COMBAT.START_Y,
             p2Data.imageKey, p2Data,
             false, // Mira a la izquierda
-            2     // Dificultad media
+            aiDifficulty
         );
         
         // Asignar target a la IA
         this.player2.setTarget(this.player1);
+    }
+
+    /**
+     * Elegir rival de la campana. Boss aparece como pelea final.
+     */
+    _selectOpponent(playerData) {
+        const selectableCharacters = getSelectableCharacters();
+        const fallbackOptions = selectableCharacters.filter(c => c.id !== playerData.id);
+        if (fallbackOptions.length === 0) return selectableCharacters[0] || playerData;
+
+        const boss = getCharacterById(CAMPAIGN.BOSS_ID);
+        const isBossFight = this.fightIndex >= CAMPAIGN.BOSS_FIGHT;
+
+        if (isBossFight && boss.id !== playerData.id) {
+            return boss;
+        }
+
+        const regularOptions = selectableCharacters.filter(c => c.id !== playerData.id && c.id !== CAMPAIGN.BOSS_ID);
+        const options = regularOptions.length > 0 ? regularOptions : fallbackOptions;
+        return options[(this.fightIndex - 1) % options.length];
     }
 
     // ==========================================
@@ -222,12 +244,16 @@ export default class FightScene extends Phaser.Scene {
         );
         
         // Anuncio de ronda
-        this._showRoundAnnouncement(`ROUND ${this.currentRound}`, () => {
+        const fightLabel = this.fightIndex >= CAMPAIGN.BOSS_FIGHT ? 'BOSS FINAL' : `PELEA ${this.fightIndex}/${this.maxFights}`;
+
+        this._showRoundAnnouncement(fightLabel, () => {
+            this._showRoundAnnouncement(`ROUND ${this.currentRound}`, () => {
             this._showRoundAnnouncement('FIGHT!', () => {
                 this.roundActive = true;
                 this.hud.startTimer(() => this._onTimeUp());
             }, COLORS.ACCENT);
-        }, COLORS.SECONDARY);
+            }, COLORS.SECONDARY);
+        }, this.fightIndex >= CAMPAIGN.BOSS_FIGHT ? COLORS.ACCENT : COLORS.SECONDARY);
     }
 
     /**
@@ -420,6 +446,9 @@ export default class FightScene extends Phaser.Scene {
                         character: this.playerCharacterId,
                         p1Wins: this.p1Wins,
                         p2Wins: this.p2Wins,
+                        fightIndex: this.fightIndex,
+                        maxFights: this.maxFights,
+                        campaignComplete: this.fightIndex >= this.maxFights,
                     });
                 } else {
                     this.scene.start(SCENES.GAME_OVER, {
@@ -427,6 +456,8 @@ export default class FightScene extends Phaser.Scene {
                         isNewHighScore,
                         rounds: this.currentRound,
                         character: this.playerCharacterId,
+                        fightIndex: this.fightIndex,
+                        maxFights: this.maxFights,
                     });
                 }
             });

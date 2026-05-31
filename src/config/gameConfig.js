@@ -9,6 +9,9 @@
 export const GAME_WIDTH = 1024;
 export const GAME_HEIGHT = 576;
 
+// Mostrar cuerpos de fisica e hitboxes de ataque en desarrollo.
+export const DEBUG_HITBOXES = false;
+
 // Colores del juego (tema cyberpunk/código)
 export const COLORS = {
     // Fondos y UI
@@ -89,7 +92,14 @@ export const COMBAT = {
     // Posiciones iniciales
     P1_START_X: 250,
     P2_START_X: 774,
-    START_Y: 450,
+    START_Y: PHYSICS.GROUND_Y,
+};
+
+// Progresion corta para que el boss aparezca rapido.
+export const CAMPAIGN = {
+    MAX_FIGHTS: 4,
+    BOSS_FIGHT: 4,
+    BOSS_ID: 'boss',
 };
 
 // Configuración de IA

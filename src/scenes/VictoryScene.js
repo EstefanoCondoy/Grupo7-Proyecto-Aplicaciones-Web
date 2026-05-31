@@ -26,6 +26,9 @@ export default class VictoryScene extends Phaser.Scene {
         this.characterId = data.character || 'programmer';
         this.p1Wins = data.p1Wins || 0;
         this.p2Wins = data.p2Wins || 0;
+        this.fightIndex = data.fightIndex || 1;
+        this.maxFights = data.maxFights || 3;
+        this.campaignComplete = data.campaignComplete || false;
     }
 
     create() {
@@ -119,7 +122,7 @@ export default class VictoryScene extends Phaser.Scene {
             color: COLORS.TEXT_WHITE,
         }).setOrigin(0.5);
         
-        this.add.text(GAME_WIDTH / 2, 345, `SCORE: ${this.finalScore}`, {
+        this.add.text(GAME_WIDTH / 2, 345, `PELEA ${this.fightIndex}/${this.maxFights}  |  SCORE: ${this.finalScore}`, {
             fontFamily: 'Orbitron, monospace',
             fontSize: '20px',
             color: COLORS.TEXT_CYAN,
@@ -155,10 +158,21 @@ export default class VictoryScene extends Phaser.Scene {
         // ==========================================
         // BOTONES
         // ==========================================
-        new Button(this, GAME_WIDTH / 2, 450, '⚔  SIGUIENTE PELEA', () => {
+        const nextLabel = this.campaignComplete ? '✓  CAMPAÑA COMPLETADA' : '⚔  SIGUIENTE PELEA';
+        new Button(this, GAME_WIDTH / 2, 450, nextLabel, () => {
             this.cameras.main.fadeOut(400, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', () => {
-                this.scene.start(SCENES.FIGHT, { playerCharacter: this.characterId });
+                if (this.campaignComplete) {
+                    this.scene.start(SCENES.CHARACTER_SELECT);
+                    return;
+                }
+
+                this.scene.start(SCENES.FIGHT, {
+                    playerCharacter: this.characterId,
+                    fightIndex: this.fightIndex + 1,
+                    maxFights: this.maxFights,
+                    campaignScore: this.finalScore,
+                });
             });
         }, { width: 280, height: 48, fontSize: '18px', bgColor: 0x6c2bd9 });
         

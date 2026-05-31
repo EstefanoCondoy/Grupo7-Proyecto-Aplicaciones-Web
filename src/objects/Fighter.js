@@ -2,113 +2,87 @@
  * ============================================
  * Fighter.js - Clase base del luchador
  * ============================================
- * Clase base que representa un luchador en el juego.
- * Extiende Phaser.Physics.Arcade.Sprite y contiene
- * toda la lógica de movimiento, ataques, daño y estados.
- * PlayerFighter y AIFighter heredan de esta clase.
+ * Clase base para movimiento, ataques, dano, estados y
+ * configuracion fisica de cada luchador.
  */
 
 import Phaser from 'phaser';
-import { FIGHTER, PHYSICS } from '../config/gameConfig.js';
+import { FIGHTER } from '../config/gameConfig.js';
 import AnimationManager from '../managers/AnimationManager.js';
+import Projectile from './Projectile.js';
 
 export default class Fighter extends Phaser.Physics.Arcade.Sprite {
     /**
      * @param {Phaser.Scene} scene - Escena activa
-     * @param {number} x - Posición X inicial
-     * @param {number} y - Posición Y inicial
-     * @param {string} texture - Key de la textura/imagen
-     * @param {object} characterData - Datos del personaje (de characterData.js)
-     * @param {boolean} facingRight - ¿Mira a la derecha?
+     * @param {number} x - Posicion X inicial
+     * @param {number} y - Posicion Y inicial
+     * @param {string} texture - Key de la textura
+     * @param {object} characterData - Datos del personaje
+     * @param {boolean} facingRight - Mira a la derecha
      */
     constructor(scene, x, y, texture, characterData, facingRight = true) {
         super(scene, x, y, texture);
-        
-        // Agregar a la escena y activar física
+
         scene.add.existing(this);
         scene.physics.add.existing(this);
-        
-        // Datos del personaje
+
         this.characterData = characterData;
         this.fighterName = characterData.name;
-        
-        // Stats modificados según el personaje
+
         this.maxHp = Math.floor(FIGHTER.MAX_HP * characterData.hpMod);
         this.hp = this.maxHp;
         this.speed = Math.floor(FIGHTER.SPEED * characterData.speedMod);
         this.jumpVelocity = Math.floor(FIGHTER.JUMP_VELOCITY * characterData.jumpMod);
         this.damageMod = characterData.damageMod;
-        
-        // Tamaño estándar universal, pero permitimos un multiplicador para los "jefes"
-        const scale = 1.4 * (characterData.scaleMod || 1);
-        const baseW = 110 * scale; 
-        const baseH = 220 * scale;
-        this.setDisplaySize(baseW, baseH);
-        
-        // Aplicar un crop (recorte) al frame original para evitar que se vean
-        // píxeles "sangrados" de los frames adyacentes (ej: el pie del siguiente frame)
-        // El frame original es 256x512. Recortamos 16px de cada lado.
-        let cropY = 0;
-        let cropH = 512;
-        
-        // Si el personaje fue generado con un duplicado vertical en el mismo frame (ej: El Bug)
-        if (characterData.cropTopHalf) {
-            cropY = 256;  // Empezar desde la mitad (abajo)
-            cropH = 256;  // Mantener solo la mitad inferior
-        }
-        
-        this.setCrop(16, cropY, 224, cropH);
-        
-        // Guardar escala base para que AnimationManager la use si hace tweens
+
+        const visual = characterData.visual || {};
+        this.setOrigin(visual.originX ?? 0.5, visual.originY ?? 1);
+        this.setDisplaySize(
+            visual.displayWidth ?? FIGHTER.DISPLAY_WIDTH,
+            visual.displayHeight ?? FIGHTER.DISPLAY_HEIGHT
+        );
+
         this.baseScaleX = this.scaleX;
         this.baseScaleY = this.scaleY;
-        
         this.setFrame(0);
-        
-        // Estado del luchador
+
         this.facingRight = facingRight;
         this.isAttacking = false;
         this.isHurt = false;
         this.isDead = false;
         this.isInvincible = false;
-        this.currentAttack = null;  // 'punch', 'kick', 'special'
-        
-        // Cooldowns (timestamps)
+        this.currentAttack = null;
+
         this.lastPunchTime = 0;
         this.lastKickTime = 0;
         this.lastSpecialTime = 0;
-        
-        // Score
+        this.attackId = 0;
+        this.currentAttackId = 0;
+
         this.score = 0;
         this.roundWins = 0;
         this.comboCount = 0;
         this.lastHitTime = 0;
-        
-        // Configurar sprite
+
         this._setupSprite(facingRight);
-        
-        // Manager de animaciones
+
         this.animManager = new AnimationManager(scene);
+        this.animManager.playIdle(this);
     }
 
     /**
-     * Configurar las propiedades del sprite y el cuerpo físico
+     * Configurar sprite y cuerpo fisico.
      */
     _setupSprite(facingRight) {
-        // La escala ya fue configurada en el constructor
-        // usando baseW y baseH. No la sobreescribimos aquí.
-        
-        // Configurar cuerpo físico
-        this.body.setSize(FIGHTER.BODY_WIDTH, FIGHTER.BODY_HEIGHT);
-        this.body.setOffset(FIGHTER.BODY_OFFSET_X, FIGHTER.BODY_OFFSET_Y);
+        const visual = this.characterData.visual || {};
+
+        this.body.setSize(visual.bodyWidth ?? FIGHTER.BODY_WIDTH, visual.bodyHeight ?? FIGHTER.BODY_HEIGHT);
+        this.body.setOffset(visual.bodyOffsetX ?? FIGHTER.BODY_OFFSET_X, visual.bodyOffsetY ?? FIGHTER.BODY_OFFSET_Y);
         this.setCollideWorldBounds(true);
-        this.setBounce(PHYSICS.BOUNCE);
-        
-        // Dirección
+        this.setBounce(0, 0);
         this.setFlipX(!facingRight);
-        
-        // Profundidad para estar encima del fondo
         this.setDepth(10);
+        this._syncBodyToSprite();
     }
 
     // ==========================================
@@ -116,36 +90,36 @@ export default class Fighter extends Phaser.Physics.Arcade.Sprite {
     // ==========================================
 
     /**
-     * Mover al luchador horizontalmente
-     * @param {number} direction - -1 (izquierda), 0 (quieto), 1 (derecha)
+     * Mover al luchador horizontalmente.
+     * @param {number} direction - -1 izquierda, 0 quieto, 1 derecha
      */
     move(direction) {
         if (this.isAttacking || this.isHurt || this.isDead) {
             this.setVelocityX(0);
             return;
         }
-        
+
         if (direction !== 0) {
             this.setVelocityX(direction * this.speed);
             this.facingRight = direction > 0;
             this.setFlipX(!this.facingRight);
             this.animManager.playWalk(this);
-        } else {
-            this.setVelocityX(0);
-            if (this.body.touching.down || this.body.blocked.down) {
-                this.animManager.playIdle(this);
-            }
+            return;
+        }
+
+        this.setVelocityX(0);
+        if (this.body.touching.down || this.body.blocked.down) {
+            this.animManager.playIdle(this);
         }
     }
 
     /**
-     * Saltar si está en el suelo
-     * @returns {boolean} true si saltó
+     * Saltar si esta en el suelo.
+     * @returns {boolean}
      */
     jump() {
         if (this.isAttacking || this.isHurt || this.isDead) return false;
-        
-        // Solo saltar si está tocando el suelo
+
         if (this.body.touching.down || this.body.blocked.down) {
             this.setVelocityY(this.jumpVelocity);
             this.animManager.playJump(this);
@@ -159,96 +133,197 @@ export default class Fighter extends Phaser.Physics.Arcade.Sprite {
     // ==========================================
 
     /**
-     * Ejecutar golpe rápido
-     * @returns {boolean} true si se ejecutó
+     * Ejecutar golpe rapido.
+     * @returns {boolean}
      */
     punch() {
         const now = Date.now();
         if (this.isAttacking || this.isHurt || this.isDead) return false;
         if (now - this.lastPunchTime < FIGHTER.PUNCH_COOLDOWN) return false;
-        
+
         this.isAttacking = true;
         this.currentAttack = 'punch';
+        this.currentAttackId = ++this.attackId;
+        const attackId = this.currentAttackId;
         this.lastPunchTime = now;
         this.setVelocityX(0);
-        
-        // Animación y callback
+
+        this._queueAttackHitbox('punch');
+        this._scheduleAttackRecovery('punch', attackId, 650);
+
         this.animManager.playPunch(this, () => {
-            this.isAttacking = false;
-            this.currentAttack = null;
+            this._finishAttack('punch', attackId);
         });
-        
-        // Efecto de sonido
+
         if (this.scene.audioManager) {
             this.scene.audioManager.playSFX('sfx_punch');
         }
-        
+
         return true;
     }
 
     /**
-     * Ejecutar patada fuerte
-     * @returns {boolean} true si se ejecutó
+     * Ejecutar patada fuerte.
+     * @returns {boolean}
      */
     kick() {
         const now = Date.now();
         if (this.isAttacking || this.isHurt || this.isDead) return false;
         if (now - this.lastKickTime < FIGHTER.KICK_COOLDOWN) return false;
-        
+
         this.isAttacking = true;
         this.currentAttack = 'kick';
+        this.currentAttackId = ++this.attackId;
+        const attackId = this.currentAttackId;
         this.lastKickTime = now;
         this.setVelocityX(0);
-        
+
+        this._queueAttackHitbox('kick');
+        this._scheduleAttackRecovery('kick', attackId, 800);
+
         this.animManager.playKick(this, () => {
-            this.isAttacking = false;
-            this.currentAttack = null;
+            this._finishAttack('kick', attackId);
         });
-        
+
         if (this.scene.audioManager) {
             this.scene.audioManager.playSFX('sfx_kick');
         }
-        
+
         return true;
     }
 
     /**
-     * Ejecutar ataque especial
-     * @returns {boolean} true si se ejecutó
+     * Limpiar estado ofensivo si la animacion termina o si se interrumpe.
+     */
+    _finishAttack(attackType, attackId) {
+        if (this.currentAttackId !== attackId || this.currentAttack !== attackType) return;
+
+        this.isAttacking = false;
+        this.currentAttack = null;
+    }
+
+    /**
+     * Failsafe contra estados de ataque atascados.
+     */
+    _scheduleAttackRecovery(attackType, attackId, duration) {
+        this.scene.time.delayedCall(duration, () => {
+            if (
+                this.active &&
+                !this.isDead &&
+                this.currentAttackId === attackId &&
+                this.currentAttack === attackType
+            ) {
+                this.isAttacking = false;
+                this.currentAttack = null;
+
+                if (!this.isHurt) {
+                    this.animManager.playIdle(this);
+                }
+            }
+        });
+    }
+
+    /**
+     * Crear la hitbox cuando la pose de ataque ya esta visible.
+     */
+    _queueAttackHitbox(attackType) {
+        if (!this.scene.collisionManager) return;
+
+        const attackId = this.currentAttackId;
+        const delay = this.characterData.hitboxes?.[attackType]?.delay || 0;
+
+        this.scene.time.delayedCall(delay, () => {
+            if (
+                this.active &&
+                this.isAttacking &&
+                !this.isHurt &&
+                !this.isDead &&
+                this.currentAttack === attackType &&
+                this.currentAttackId === attackId
+            ) {
+                this.scene.collisionManager.createAttackHitbox(this, attackType);
+            }
+        });
+    }
+
+    /**
+     * Ejecutar ataque especial.
+     * @returns {boolean}
      */
     special() {
         const now = Date.now();
         if (this.isAttacking || this.isHurt || this.isDead) return false;
         if (now - this.lastSpecialTime < FIGHTER.SPECIAL_COOLDOWN) return false;
-        
+
         this.isAttacking = true;
         this.currentAttack = 'special';
+        this.currentAttackId = ++this.attackId;
+        const attackId = this.currentAttackId;
         this.lastSpecialTime = now;
         this.setVelocityX(0);
-        
+
+        this.scene.time.delayedCall(150, () => {
+            if (
+                this.active &&
+                this.isAttacking &&
+                this.currentAttack === 'special' &&
+                this.currentAttackId === attackId &&
+                !this.isHurt &&
+                !this.isDead
+            ) {
+                this._spawnSpecialProjectile();
+            }
+        });
+        this._scheduleAttackRecovery('special', attackId, 900);
+
         this.animManager.playSpecial(
-            this, 
-            this.characterData.specialColor, 
+            this,
+            this.characterData.specialColor,
             () => {
-                this.isAttacking = false;
-                this.currentAttack = null;
+                this._finishAttack('special', attackId);
             }
         );
-        
+
         if (this.scene.audioManager) {
             this.scene.audioManager.playSFX('sfx_special');
         }
-        
+
         return true;
     }
 
     /**
-     * Obtener el daño del ataque actual
-     * @returns {number} Daño del ataque
+     * Crear el proyectil fisico del ataque especial.
      */
-    getAttackDamage() {
+    _spawnSpecialProjectile() {
+        const direction = this.facingRight ? 1 : -1;
+        const projectileConfig = this.characterData.projectile || {};
+        const spawnX = this.x + direction * (projectileConfig.offsetX ?? Math.max(80, this.displayWidth * 0.45));
+        const spawnY = this.y + (projectileConfig.offsetY ?? -Math.max(120, this.displayHeight * 0.58));
+        const damage = Math.floor(FIGHTER.SPECIAL_DAMAGE * this.damageMod);
+
+        const projectile = new Projectile(
+            this.scene,
+            spawnX,
+            spawnY,
+            direction,
+            this.characterData.specialColor,
+            damage,
+            this
+        );
+
+        if (this.scene.collisionManager) {
+            this.scene.collisionManager.addProjectile(projectile);
+        }
+    }
+
+    /**
+     * Obtener dano de un ataque.
+     * @param {string} attackType
+     * @returns {number}
+     */
+    getAttackDamage(attackType = this.currentAttack) {
         let baseDamage = 0;
-        switch (this.currentAttack) {
+        switch (attackType) {
             case 'punch':
                 baseDamage = FIGHTER.PUNCH_DAMAGE;
                 break;
@@ -265,11 +340,12 @@ export default class Fighter extends Phaser.Physics.Arcade.Sprite {
     }
 
     /**
-     * Obtener el rango del ataque actual
+     * Obtener rango de referencia para IA.
+     * @param {string} attackType
      * @returns {number}
      */
-    getAttackRange() {
-        switch (this.currentAttack) {
+    getAttackRange(attackType = this.currentAttack) {
+        switch (attackType) {
             case 'punch': return FIGHTER.PUNCH_RANGE;
             case 'kick': return FIGHTER.KICK_RANGE;
             case 'special': return FIGHTER.SPECIAL_RANGE;
@@ -278,62 +354,65 @@ export default class Fighter extends Phaser.Physics.Arcade.Sprite {
     }
 
     // ==========================================
-    // RECIBIR DAÑO
+    // RECIBIR DANO
     // ==========================================
 
     /**
-     * Recibir daño de un ataque
-     * @param {number} amount - Cantidad de daño
-     * @param {number} fromX - Posición X del atacante (para knockback)
-     * @returns {boolean} true si murió
+     * Recibir dano de un ataque.
+     * @param {number} amount - Cantidad de dano
+     * @param {number} fromX - Posicion X del atacante
+     * @returns {boolean} true si murio
      */
     takeDamage(amount, fromX) {
         if (this.isInvincible || this.isDead) return false;
-        
+
         this.hp = Math.max(0, this.hp - amount);
         this.isHurt = true;
         this.isAttacking = false;
         this.currentAttack = null;
-        
-        // Knockback: empujar en dirección opuesta al atacante
+
         const knockDir = (this.x > fromX) ? 1 : -1;
         this.setVelocityX(knockDir * FIGHTER.KNOCKBACK_X);
         this.setVelocityY(FIGHTER.KNOCKBACK_Y);
-        
-        // Animación de daño
+
         this.animManager.playHurt(this, () => {
             this.isHurt = false;
         });
-        
-        // Invulnerabilidad temporal
+        this.scene.time.delayedCall(FIGHTER.HURT_DURATION, () => {
+            if (this.active && !this.isDead) {
+                this.isHurt = false;
+            }
+        });
+
         this.isInvincible = true;
         this.animManager.playInvincible(this, FIGHTER.INVINCIBLE_DURATION);
-        
+
         this.scene.time.delayedCall(FIGHTER.INVINCIBLE_DURATION, () => {
             this.isInvincible = false;
+            if (this.active && !this.isDead) {
+                this.clearTint();
+                this.setAlpha = 1;
+            }
         });
-        
-        // Sonido de daño
+
         if (this.scene.audioManager) {
             this.scene.audioManager.playSFX('sfx_hurt');
         }
-        
-        // Screen shake
+
         if (this.scene.cameras && this.scene.cameras.main) {
             this.scene.cameras.main.shake(100, 0.005);
         }
-        
-        // ¿Murió?
+
         if (this.hp <= 0) {
             this.die();
             return true;
         }
-        
+
         return false;
     }
 
     /**
-     * Ejecutar la muerte del luchador
+     * Ejecutar muerte del luchador.
      */
     die() {
         this.isDead = true;
@@ -341,9 +420,9 @@ export default class Fighter extends Phaser.Physics.Arcade.Sprite {
         this.isHurt = false;
         this.setVelocityX(0);
         this.body.enable = false;
-        
+
         this.animManager.playDeath(this);
-        
+
         if (this.scene.audioManager) {
             this.scene.audioManager.playSFX('sfx_defeat');
         }
@@ -354,9 +433,9 @@ export default class Fighter extends Phaser.Physics.Arcade.Sprite {
     // ==========================================
 
     /**
-     * Reiniciar al luchador para nueva ronda
-     * @param {number} x - Nueva posición X
-     * @param {number} y - Nueva posición Y
+     * Reiniciar al luchador para nueva ronda.
+     * @param {number} x - Nueva posicion X
+     * @param {number} y - Nueva posicion Y
      */
     resetFighter(x, y) {
         this.hp = this.maxHp;
@@ -366,29 +445,46 @@ export default class Fighter extends Phaser.Physics.Arcade.Sprite {
         this.isInvincible = false;
         this.currentAttack = null;
         this.comboCount = 0;
-        
+
         this.setPosition(x, y);
         this.setVelocity(0, 0);
-        this.clearTint();
-        this.setAlpha(1);
+
+        if (this.animManager) {
+            this.animManager.stopAll(this);
+        }
+
+        if (typeof this.clearTint === 'function') {
+            this.clearTint();
+        }
+
+        this.alpha = 1;
+        this.visible = true;
+
         this.setAngle(0);
-        this.body.enable = true;
+
+        if (this.body) {
+            this.body.enable = true;
+            this.body.setVelocity(0, 0);
+        }
+
         this.scaleX = this.baseScaleX;
         this.scaleY = this.baseScaleY;
-        
-        this.animManager.stopAll(this);
+
+        this._syncBodyToSprite();
+
+        this.animManager.playIdle(this);    
     }
 
     /**
-     * Obtener porcentaje de vida
-     * @returns {number} 0-1
+     * Obtener porcentaje de vida.
+     * @returns {number}
      */
     getHpPercent() {
         return this.hp / this.maxHp;
     }
 
     /**
-     * ¿Está en el suelo?
+     * Esta en el suelo.
      * @returns {boolean}
      */
     isGrounded() {
@@ -396,7 +492,7 @@ export default class Fighter extends Phaser.Physics.Arcade.Sprite {
     }
 
     /**
-     * Distancia a otro fighter
+     * Distancia a otro luchador.
      * @param {Fighter} other
      * @returns {number}
      */
@@ -405,9 +501,19 @@ export default class Fighter extends Phaser.Physics.Arcade.Sprite {
     }
 
     /**
-     * Update llamado cada frame
+     * Update llamado cada frame.
      */
     update() {
-        // Override en subclases
+        // Override en subclases.
     }
+
+    /**
+     * Sincroniza el cuerpo con la posicion/origen actual del sprite.
+     */
+    _syncBodyToSprite() {
+        if (this.body?.updateFromGameObject) {
+            this.body.updateFromGameObject();
+        }
+    }
+
 }

@@ -10,11 +10,13 @@
 
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS, SCENES } from '../config/gameConfig.js';
+import { CHARACTERS } from '../config/characterData.js';
 
 // Importar imágenes como módulos (Vite)
-import fighter1Img from '../assets/images/fighter1_programmer.png';
-import fighter2Img from '../assets/images/fighter2_bug.png';
-import fighter3Img from '../assets/images/fighter3_student.png';
+import fighter1Img from '../assets/images/fighter1_programmer_clean_padded.png';
+import fighter2Img from '../assets/images/fighter2_bug_padded.png';
+import fighter2BossImg from '../assets/images/fighter2_boss_padded.png';
+import fighter3Img from '../assets/images/fighter3_student_clean_padded.png';
 import stageImg from '../assets/images/stage_computer_lab.png';
 import menuBgImg from '../assets/images/menu_background.png';
 import charSelectBgImg from '../assets/images/character_select_bg.png';
@@ -25,7 +27,15 @@ import effectsImg from '../assets/images/special_effects.png';
 // Retratos de personajes (imágenes estáticas de presentación)
 import fighter1Portrait from '../assets/images/fighter1_portrait.png';
 import fighter2Portrait from '../assets/images/fighter2_portrait.png';
+import fighter2BossPortrait from '../assets/images/fighter2_boss_portrait.png';
 import fighter3Portrait from '../assets/images/fighter3_portrait.png';
+
+const FIGHTER_ASSETS = {
+    fighter1_programmer: fighter1Img,
+    fighter2_bug: fighter2Img,
+    fighter2_boss: fighter2BossImg,
+    fighter3_student: fighter3Img,
+};
 
 export default class BootScene extends Phaser.Scene {
     constructor() {
@@ -45,10 +55,14 @@ export default class BootScene extends Phaser.Scene {
         // CARGAR IMÁGENES
         // ==========================================
         
-        // Personajes (1024x1024, 4 columnas x 2 filas -> 256x512)
-        this.load.spritesheet('fighter1_programmer', fighter1Img, { frameWidth: 256, frameHeight: 512 });
-        this.load.spritesheet('fighter2_bug', fighter2Img, { frameWidth: 256, frameHeight: 512 });
-        this.load.spritesheet('fighter3_student', fighter3Img, { frameWidth: 256, frameHeight: 512 });
+        // Personajes: cada spritesheet usa su propia configuracion de frames.
+        CHARACTERS.forEach(character => {
+            this.load.spritesheet(
+                character.imageKey,
+                FIGHTER_ASSETS[character.imageKey],
+                character.frameConfig
+            );
+        });
         
         // Escenarios
         this.load.image('stage_computer_lab', stageImg);
@@ -65,6 +79,7 @@ export default class BootScene extends Phaser.Scene {
         // Retratos de personajes (para selección y victoria)
         this.load.image('fighter1_portrait', fighter1Portrait);
         this.load.image('fighter2_portrait', fighter2Portrait);
+        this.load.image('fighter2_boss_portrait', fighter2BossPortrait);
         this.load.image('fighter3_portrait', fighter3Portrait);
     }
 
