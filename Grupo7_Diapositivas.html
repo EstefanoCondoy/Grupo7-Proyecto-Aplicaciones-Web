@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mortal Systems - Proyecto Final</title>
+    <style>
+        :root {
+            --primary: #6c2bd9;
+            --secondary: #00e5ff;
+            --accent: #ff3366;
+            --bg-dark: #050510;
+            --panel-bg: rgba(26, 26, 62, 0.85);
+            --text-main: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body,
+        html {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Contenedor principal */
+        .presentation-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Diapositivas */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out, transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transform: scale(0.95);
+            z-index: 1;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(10, 10, 26, 0.9) 0%, rgba(10, 10, 26, 0.7) 100%);
+            z-index: 0;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: scale(1);
+            z-index: 10;
+        }
+
+        /* Contenido interno */
+        .content {
+            position: relative;
+            z-index: 2;
+            width: 80%;
+            max-width: 1200px;
+            padding: 40px;
+            background: var(--panel-bg);
+            border-radius: 20px;
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 30px rgba(108, 43, 217, 0.3);
+            text-align: center;
+        }
+
+        /* Tipografía */
+        h1 {
+            font-size: 4rem;
+            color: var(--secondary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 30px;
+        }
+
+        h3 {
+            font-size: 1.8rem;
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+
+        p,
+        li {
+            font-size: 1.4rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        ul {
+            padding-left: 30px;
+            text-align: left;
+        }
+
+        li {
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            color: var(--secondary);
+            font-weight: bold;
+        }
+
+        /* Tarjetas de personajes */
+        .cards-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 20px;
+            width: 280px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: var(--secondary);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+        }
+
+        .card img {
+            width: 180px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #333;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 8px 20px;
+            background-color: var(--primary);
+            border-radius: 30px;
+            font-size: 1.2rem;
+            margin: 5px;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(108, 43, 217, 0.5);
+        }
+
+        /* Controles */
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            gap: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 30px;
+            border-radius: 40px;
+            border: 1px solid var(--primary);
+            align-items: center;
+        }
+
+        button {
+            background-color: transparent;
+            color: var(--secondary);
+            border: 2px solid var(--secondary);
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            background-color: var(--secondary);
+            color: var(--bg-dark);
+            box-shadow: 0 0 15px var(--secondary);
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 6px;
+            background-color: var(--accent);
+            z-index: 100;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        #counter {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="progress-bar" id="progress"></div>
+
+    <div class="presentation-container" id="presentation">
+
+        <!-- DIAPOSITIVA 1: Portada -->
+        <div class="slide active" style="background-image: url('./src/assets/images/menu_background.png');">
+            <div class="content" style="background: rgba(10, 10, 30, 0.9); border: 2px solid var(--secondary);">
+                <h1 style="font-size: 5rem;">MORTAL SYSTEMS</h1>
+                <h2 style="font-size: 2rem; margin-bottom: 5px;">FACULTAD DE INGENIERÍA EN SISTEMAS</h2>
+                <h2 style="font-size: 1.8rem; color: var(--text-main); font-weight: normal;">Proyecto Final -
+                    Aplicaciones Web</h2>
+
+                <div style="margin: 30px 0;">
+                    <span class="tag">Desarrollo de Videojuegos</span>
+                    <span class="tag">Phaser.js</span>
+                    <span class="tag">Web Audio API</span>
+                </div>
+
+                <div style="margin-top: 30px; text-align: center;">
+                    <h3 style="color: var(--text-main); margin-bottom: 15px;">Equipo Desarrollador:</h3>
+                    <p style="text-align: center; font-size: 1.6rem; margin-bottom: 5px;">Estéfano Condoy</p>
+                    <p style="text-align: center; font-size: 1.6rem; margin-bottom: 5px;">Eddy Sangucho</p>
+                    <p style="text-align: center; font-size: 1.6rem;">César Zapata</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- DIAPOSITIVA 2: Concepto y Personajes -->
+        <div class="slide" style="background-image: url('./src/assets/images/character_select_bg.png');">
+            <div class="content" style="max-width: 1400px; width: 95%;">
+                <h1>Los Héroes del Sistema</h1>
+                <h2>Un entorno digital invadido por código malicioso</h2>
+
+                <div class="cards-container">
+                    <div class="card">
+                        <img src="./src/assets/images/fighter1_portrait.png" alt="El Programador">
+                        <h3 style="color: #6c5ce7;">El Programador</h3>
+                        <p style="text-align: center; font-size: 1.1rem; color: #aaa;">Backend Developer</p>
+                        <p style="text-align: center; font-size: 1rem; margin-top: 10px;">Ágil y rápido. Su ataque
+                            especial es el devastador "Keyboard Smash".</p>
+                    </div>
+
+                    <div class="card">
+                        <img src="./src/assets/images/fighter3_portrait.png" alt="La Ingeniera">
+                        <h3 style="color: #00cec9;">La Ingeniera</h3>
+                        <p style="text-align: center; font-size: 1.1rem; color: #aaa;">Full Stack Dev</p>
+                        <p style="text-align: center; font-size: 1rem; margin-top: 10px;">Fuerza balanceada. Domina la
+                            arena con su habilidad "Compile Error".</p>
+                    </div>
+
+                    <div class="card">
+                        <img src="./src/assets/images/fighter2_portrait.png" alt="El Bug">
+                        <h3 style="color: #ff3838;">El Bug</h3>
+                        <p style="text-align: center; font-size: 1.1rem; color: #aaa;">Runtime Error</p>
+                        <p style="text-align: center; font-size: 1rem; margin-top: 10px;">Lento pero letal. Destruye la
+                            defensa enemiga con su "Memory Leak".</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DIAPOSITIVA 3: Tecnologías y Esquema -->
+        <div class="slide" style="background-image: url('./src/assets/images/stage_computer_lab.png');">
+            <div class="content" style="max-width: 1400px; width: 95%;">
+                <h1>Tecnologías y Esquema</h1>
+                <h2>Herramientas base para nuestro desarrollo</h2>
+
+                <div style="display: flex; gap: 40px; margin-top: 20px;">
+                    <div style="flex: 1; text-align: left;">
+                        <h3 style="color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 10px;">
+                            Stack Tecnológico Utilizado</h3>
+                        <ul style="margin-top: 20px;">
+                            <li><span class="highlight">Core:</span> Phaser.js (Motor Gráfico) y JavaScript moderno
+                                (ES6+).</li>
+                            <li><span class="highlight">Audio API:</span> Uso profundo de <strong>Web Audio API</strong>
+                                nativa para la síntesis procedural de sonido (generación matemática en tiempo real).
+                            </li>
+                            <li><span class="highlight">Entorno y Build:</span> Vite para compilación rápida y
+                                modularidad.</li>
+                            <li><span class="highlight">Control y Herramientas:</span> Git, GitHub y Visual Studio Code.
+                            </li>
+                            <li><span class="highlight">Assets Gráficos:</span> Spritesheets estructurados adaptados de
+                                Kenney.</li>
+                        </ul>
+                    </div>
+                    <div style="flex: 1;">
+                        <h3
+                            style="color: var(--secondary); border-bottom: 2px solid var(--secondary); padding-bottom: 10px;">
+                            Esquema de Arquitectura</h3>
+                        <div
+                            style="margin-top: 20px; background: rgba(0,0,0,0.6); padding: 25px; border-radius: 15px; border: 1px solid var(--secondary); font-family: 'Courier New', monospace; font-size: 1.5rem; line-height: 2; text-align: center; color: var(--text-main); font-weight: bold; box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.2);">
+                            Scene Manager<br>
+                            <span style="color: var(--accent);">↓</span><br>
+                            Game Objects<br>
+                            <span style="color: var(--accent);">↓</span><br>
+                            Physics (Arcade)<br>
+                            <span style="color: var(--accent);">↓</span><br>
+                            UI / HUD<br>
+                            <span style="color: var(--accent);">↓</span><br>
+                            Audio Manager<br>
+                            <span style="color: var(--accent);">↓</span><br>
+                            Storage Manager
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DIAPOSITIVA 4: Arquitectura Técnica -->
+        <div class="slide" style="background-image: url('./src/assets/images/stage_computer_lab.png');">
+            <div class="content">
+                <h1>Arquitectura del Proyecto</h1>
+                <h2>Desarrollo Modular y Escalable</h2>
+
+                <ul>
+                    <li><span class="highlight">Flujo de Escenas (Phaser Scenes):</span> BootScene (Carga de assets),
+                        MenuScene, CharacterSelect y FightScene, permitiendo un ciclo de vida completo.</li>
+                    <li><span class="highlight">Estructura Profesional:</span> División estricta en carpetas:
+                        <code>/scenes</code>, <code>/managers</code>, <code>/ui</code>, <code>/config</code>. Separando
+                        la lógica visual de los datos.
+                    </li>
+                    <li><span class="highlight">Patrón de Managers:</span> Implementación de
+                        <strong>InputManager</strong> (unifica teclado y touch) y <strong>AudioManager</strong>.
+                    </li>
+                    <li><span class="highlight">Datos Centralizados:</span> Stats, configuraciones físicas y colores
+                        mapeados en <code>gameConfig.js</code> y <code>characterData.js</code>, facilitando el balanceo
+                        del juego.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- DIAPOSITIVA 5: Organización del Código -->
+        <div class="slide" style="background-image: url('./src/assets/images/menu_background.png');">
+            <div class="content" style="max-width: 1400px; width: 95%;">
+                <h1>Estructura del Proyecto</h1>
+                <h2>¿Qué hace cada módulo en nuestro código?</h2>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; text-align: left;">
+                    <div style="background: rgba(0,0,0,0.6); padding: 25px; border-radius: 12px; border-left: 4px solid var(--secondary);">
+                        <h3 style="color: var(--secondary); margin-bottom: 10px; border-bottom: none;">📂 /scenes</h3>
+                        <p style="font-size: 1.2rem; line-height: 1.5; margin-bottom: 0;"><strong>Control del ciclo de vida:</strong> Administran las pantallas del juego (<code>BootScene</code> precarga, <code>MenuScene</code>, <code>FightScene</code> controla el game loop, y <code>GameOverScene</code>).</p>
+                    </div>
+                    
+                    <div style="background: rgba(0,0,0,0.6); padding: 25px; border-radius: 12px; border-left: 4px solid var(--accent);">
+                        <h3 style="color: var(--accent); margin-bottom: 10px; border-bottom: none;">📂 /objects</h3>
+                        <p style="font-size: 1.2rem; line-height: 1.5; margin-bottom: 0;"><strong>Entidades del juego (POO):</strong> Clases instanciables. Aquí está <code>Fighter.js</code> (físicas) y su hijo <code>AIFighter.js</code> (IA de enemigos).</p>
+                    </div>
+
+                    <div style="background: rgba(0,0,0,0.6); padding: 25px; border-radius: 12px; border-left: 4px solid #6c5ce7;">
+                        <h3 style="color: #6c5ce7; margin-bottom: 10px; border-bottom: none;">📂 /managers</h3>
+                        <p style="font-size: 1.2rem; line-height: 1.5; margin-bottom: 0;"><strong>Controladores Lógicos:</strong> Separan la lógica pesada. <code>AudioManager</code> (síntesis procedural), <code>InputManager</code> y <code>CollisionManager</code>.</p>
+                    </div>
+
+                    <div style="background: rgba(0,0,0,0.6); padding: 25px; border-radius: 12px; border-left: 4px solid #00ff88;">
+                        <h3 style="color: #00ff88; margin-bottom: 10px; border-bottom: none;">📂 /config & /ui</h3>
+                        <p style="font-size: 1.2rem; line-height: 1.5; margin-bottom: 0;"><strong>Variables y HUD:</strong> Los archivos de configuración balancean el juego, mientras que la UI (botones/texto) se aísla de las escenas principales.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DIAPOSITIVA 6: Físicas y Colisiones -->
+        <div class="slide" style="background-image: url('./src/assets/images/stage_computer_lab.png');">
+            <div class="content">
+                <h1>Físicas y Colisiones</h1>
+                <h2>El núcleo del combate (Arcade Physics)</h2>
+
+                <div style="display: flex; align-items: center; gap: 40px;">
+                    <div style="flex: 1;">
+                        <ul>
+                            <li><span class="highlight">Gravedad y Mundo:</span> Uso del motor físico de Phaser para
+                                saltos realistas, límites de pantalla y colisiones con el suelo.</li>
+                            <li><span class="highlight">Sistema de Hitboxes:</span> Generación dinámica de rectángulos
+                                de impacto (Overlaps) sincronizados exactamente con fotogramas de ataque específicos.
+                            </li>
+                            <li><span class="highlight">Knockback y Estados:</span> Aplicación de fuerza física
+                                invertida al recibir daño y un sistema de "cooldowns" para evitar el spam de ataques.
+                            </li>
+                        </ul>
+                    </div>
+                    <div style="flex: 1; text-align: center;">
+                        <img src="./src/assets/images/special_effects.png"
+                            style="width: 100%; max-width: 400px; border-radius: 15px; border: 2px solid var(--primary);"
+                            alt="Hitboxes">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DIAPOSITIVA 5: UI, Audio y Persistencia -->
+        <div class="slide" style="background-image: url('./src/assets/images/menu_background.png');">
+            <div class="content">
+                <h1>Experiencia y Persistencia</h1>
+                <h2>Inmersión total para el jugador</h2>
+
+                <ul>
+                    <li><span class="highlight">Síntesis de Audio (Web Audio API):</span> Música y efectos de sonido
+                        (golpes, explosiones) no se cargan de archivos pesados, sino que son <strong>sintetizados
+                            matemáticamente en tiempo real</strong> mediante el AudioManager.</li>
+                    <li><span class="highlight">HUD Avanzado:</span> Barras de vida dinámicas con interpolaciones
+                        (tweens) que cambian de verde a rojo según el estado crítico.</li>
+                    <li><span class="highlight">Feedback Visual:</span> Efectos de <em>Camera Shake</em> (temblor) y
+                        <em>Flash</em> al conectar golpes críticos para dar peso a los impactos.
+                    </li>
+                    <li><span class="highlight">Soporte Multiplataforma:</span> Controles por teclado para Desktop y
+                        botones virtuales táctiles transparentes para dispositivos móviles.</li>
+                    <li><span class="highlight">Persistencia (localStorage):</span> Guardado automático de
+                        configuraciones (volumen/mute) y nivel máximo alcanzado (High Score).</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- DIAPOSITIVA 6: Extras y Jefe Final -->
+        <div class="slide" style="background-image: url('./src/assets/images/victory_screen.png');">
+            <div class="content">
+                <h1 style="color: var(--accent);">Bonus Features</h1>
+                <h2>Llevando el juego al siguiente nivel</h2>
+
+                <div style="display: flex; gap: 40px; margin-top: 30px; align-items: center;">
+                    <div style="flex: 2;">
+                        <ul>
+                            <li><span class="highlight">IA Dinámica (AIFighter):</span> Máquina de estados que evalúa vida restante y distancias para tomar decisiones matemáticas de atacar, defenderse o retirarse en tiempo real.</li>
+                            <li><span class="highlight">Programación Orientada a Objetos:</span> Arquitectura avanzada con herencia de clases base (<code>Fighter</code> -> <code>AIFighter</code>) para reusabilidad extrema.</li>
+                            <li><span class="highlight">Boss Final Exclusivo:</span> Creación de <strong>"El Final
+                                    Ransomware"</strong>. Un enemigo colosal, no seleccionable, con daño masivo y tamaño
+                                aumentado.</li>
+                            <li><span class="highlight">Modo Multijugador Local:</span> Soporte nativo integrado para
+                                batallas 1vs1 en la misma computadora (Teclado izquierdo vs Teclado derecho).</li>
+                            <li><span class="highlight">Animaciones Complejas:</span> Integración de
+                                <em>Spritesheets</em> masivos con múltiples estados (Idle, Caminar, Saltar, Golpe,
+                                Patada, Especial, Daño, Muerte, Victoria).
+                            </li>
+                        </ul>
+                    </div>
+                    <div style="flex: 1;">
+                        <div class="card" style="width: 100%; border-color: var(--accent);">
+                            <img src="./src/assets/images/fighter2_boss_portrait.png" alt="Boss Final"
+                                style="border-color: var(--accent);">
+                            <h3 style="color: var(--accent);">Final Ransomware</h3>
+                            <p style="text-align: center; font-size: 1rem;">La prueba definitiva</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Controles -->
+    <div class="controls">
+        <button onclick="prevSlide()">❮ Anterior</button>
+        <span id="counter">1 / 8</span>
+        <button onclick="nextSlide()">Siguiente ❯</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progress');
+        const counter = document.getElementById('counter');
+
+        function updateSlides() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            counter.innerText = `${currentSlide + 1} / ${slides.length}`;
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                updateSlides();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlides();
+            }
+        }
+
+        // Navegación por teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        // Inicializar
+        updateSlides();
+    </script>
+</body>
+
+</html>
